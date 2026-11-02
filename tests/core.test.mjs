@@ -3,6 +3,32 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import { selectObjects, createScene, renderSVG, validatePalette, setDetail, arrangeScene } from '../src/core.mjs';
 const catalog = JSON.parse(fs.readFileSync(new URL('../assets/catalog.json', import.meta.url)));
+
+test('варианты различаются и у одного предмета, и в большой сцене',()=>{
+  for(const ids of [['phone'],['book','phone','puzzle','pen','lamp','folder']]){
+    const variants=[0,1,2].map(variant=>createScene({ids,width:1200,height:630,variant},catalog));
+    const signatures=variants.map(s=>JSON.stringify([...s.items].sort((a,b)=>a.assetId.localeCompare(b.assetId)).map(i=>[i.assetId,i.x,i.y,i.scale])));
+    assert.equal(new Set(signatures).size,3);
+  }
+});
+
+test('три варианта дают разные композиции при одинаковых предметах, формате и расположении',()=>{
+  for(const roles of [['main','main','background'],['main','main','main'],['background','background','background']])for(const [width,height]of [[1200,630],[1080,1080],[1080,1440]]){
+    const variants=[0,1,2].map(variant=>createScene({ids:['wallet','coin','folder'],roles,width,height,variant},catalog));
+    const signature=s=>JSON.stringify([...s.items].sort((a,b)=>a.assetId.localeCompare(b.assetId)).map(i=>[i.assetId,i.x,i.y,i.scale]));
+    assert.equal(new Set(variants.map(signature)).size,3);
+    for(const s of variants)for(const item of s.items){const a=catalog.objects.find(o=>o.id===item.assetId).variants[s.detail][item.role];assert.ok(item.x>=0&&item.y>=0&&item.x+a.width*item.scale<=width+.1&&item.y+a.height*item.scale<=height+.1);assert.equal(item.scale,s.items[0].scale);}
+  }
+});
+
+test('место под заголовок оставляет верх портрета и левую часть обложки свободными',()=>{
+  const options={ids:['phone','puzzle','pen'],roles:['main','main','background'],layout:'title'};
+  for(const variant of [0,1,2]){
+    const wide=createScene({...options,width:1200,height:630,variant},catalog),tall=createScene({...options,width:1080,height:1440,variant},catalog);
+    assert.ok(wide.items.every(i=>i.x>=1200*.35));
+    assert.ok(tall.items.every(i=>i.y>=1440*.26));
+  }
+});
 test('названия компонентов дают именно запрошенные объекты', () => {
   assert.deepEqual(selectObjects('книга, наушники, лампа', catalog, 'components').ids, ['book','headphones','lamp']);
 });

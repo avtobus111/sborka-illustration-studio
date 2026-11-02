@@ -5,6 +5,21 @@ import {createSemanticSelector} from '../src/semantic.mjs';
 const catalog=JSON.parse(fs.readFileSync(new URL('../assets/catalog.json',import.meta.url)));
 const selector=await createSemanticSelector(catalog);
 
+test('смысловой подбор предлагает до трёх реальных тем для ручного уточнения',async()=>{
+  const r=await selector.select('Найти общий язык');
+  assert.ok(r.alternatives?.length>=1&&r.alternatives.length<=3);
+  assert.equal(r.alternatives[0].theme,r.theme);
+  assert.equal(new Set(r.alternatives.map(a=>a.theme)).size,r.alternatives.length);
+  for(const a of r.alternatives){assert.ok(a.ids.every(id=>catalog.objects.some(o=>o.id===id)));assert.equal(a.roles.length,a.ids.length);}
+  assert.equal(r.needsReview,false);
+});
+
+test('слабая ассоциация требует выбора пользователя вместо уверенной сборки',async()=>{
+  const r=await selector.select('Удобный сервис всегда под рукой');
+  assert.equal(r.needsReview,true);
+  assert.ok(r.alternatives.length>0);
+});
+
 const cases=[
   {query:'Найти общий язык',required:['puzzle','phone']},
   {query:'Копить на мечту',required:['wallet','coin']},

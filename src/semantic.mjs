@@ -27,7 +27,7 @@ export async function createSemanticSelector(catalog){
     model:MODEL_ID,
     async select(query){
       const text=String(query||'').trim();
-      const empty=explanation=>({ids:[],roles:[],engine:'sentence-transformer',model:MODEL_ID,explanation});
+      const empty=explanation=>({ids:[],roles:[],alternatives:[],needsReview:false,engine:'sentence-transformer',model:MODEL_ID,explanation});
       if(text.length<3)return empty('Введите заголовок или метафору.');
       if(text.length>500)throw Error('Запрос должен быть короче 500 символов.');
       if(!/[а-яёa-z]{3}/i.test(text))return empty('Нужна осмысленная фраза словами.');
@@ -40,7 +40,9 @@ export async function createSemanticSelector(catalog){
       const tokenized=await encoder.tokenizer(text,{truncation:true,max_length:192});
       const fragmented=words.length>=2&&(tokenized.input_ids.dims[1]-2)/words.length>3;
       if(best.score<0.33 || unsupported>best.score+0.005 || (best.score<0.45&&(best.score-ranks[1].score<0.02||fragmented)))return empty('В исходной библиотеке не нашлось убедительной метафоры для этой темы. Уточните смысл или выберите объекты.');
-      const result={ids:best.profile.ids.filter(id=>validIds.has(id)),roles:[...best.profile.roles],theme:best.profile.id,themeName:best.profile.name,confidence:Number(best.score.toFixed(3)),engine:'sentence-transformer',model:MODEL_ID,explanation:`${best.profile.name}. Объекты подобраны локальной языковой моделью.`};
+      const alternatives=ranks.filter(r=>r.score>=Math.max(.33,best.score-.12)).slice(0,3).map(({profile,score})=>({ids:profile.ids.filter(id=>validIds.has(id)),roles:[...profile.roles],theme:profile.id,themeName:profile.name,confidence:Number(score.toFixed(3))}));
+      const needsReview=best.score<.45||(best.score<.6&&best.score-ranks[1].score<.025);
+      const result={...alternatives[0],alternatives,needsReview,engine:'sentence-transformer',model:MODEL_ID,explanation:needsReview?'Есть несколько возможных трактовок. Выберите подходящий смысл.':`${best.profile.name}. Объекты подобраны локальной языковой моделью.`};
       if(result.ids.length!==best.profile.ids.length)throw Error('Профиль ссылается на отсутствующий объект каталога.');
       if(cache.size>=100)cache.delete(cache.keys().next().value);cache.set(text,result);
       return structuredClone(result);

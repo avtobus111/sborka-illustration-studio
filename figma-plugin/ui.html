@@ -8,11 +8,14 @@
 .studio{height:calc(100vh - 76px);overflow:hidden}.workspace{min-height:0}.canvas-well{min-height:200px}.library-panel{overflow:auto}.brand strong{letter-spacing:-.035em}::selection{background:#dbe6f5;color:#203751}input,textarea{caret-color:#294979}*{scrollbar-color:#bdc5d0 transparent;scrollbar-width:thin}.panel-note,.field-label,.label-row,.small-muted,.source-label,.palette-row .palette-name,.checkbox-row,.workspace-status,.library-footer,.prompt-footer>span,.canvas-caption,.local-label,.muted-link{color:#646f7f}.asset-card{color:#5d6572}
 @media(max-width:800px){.studio{height:auto;overflow:visible}.canvas-well{min-height:340px;flex:none}.library-panel{overflow:visible}.workspace{min-height:550px}.properties-panel{overflow:visible}}
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}
+.project-menu{position:relative;color:#424953;font-size:12px}.project-menu summary{list-style:none;cursor:pointer;padding:10px 12px;border:1px solid var(--line);border-radius:7px;background:#fff;font-weight:600}.project-menu summary::after{content:'⌄';margin-left:9px;color:#646f7f}.project-menu summary::-webkit-details-marker{display:none}.project-menu summary:focus-visible,.meaning-choices summary:focus-visible{outline:3px solid #8fa9d0;outline-offset:3px}.project-menu-panel{position:absolute;top:calc(100% + 8px);right:0;width:235px;padding:7px;background:#fff;border-radius:8px;box-shadow:0 8px 32px #172e4c26;z-index:10}.project-menu-panel button{display:block;width:100%;padding:12px 10px;background:transparent;border:0;text-align:left;border-radius:5px;color:#303946}.project-menu-panel button:hover{background:#edf2f9}.project-menu-panel p{font-size:11px;line-height:1.5;color:#646f7f;padding:8px 10px}.canvas-bar>.document-meta{display:grid;grid-template-columns:6px minmax(0,1fr) auto;column-gap:9px;row-gap:3px;min-width:0;max-width:60%}.document-meta #document-name{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:29ch}.document-meta #save-state{grid-column:2/-1;font-size:9px;color:#646f7f;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.canvas-actions{flex-shrink:0}.variant-previews{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}.variant-preview{padding:3px;border:1px solid var(--line);border-radius:6px;background:white;color:#646f7f;min-width:0}.variant-preview svg{display:block;width:100%;height:48px;background:#f4f5f7}.variant-preview span{display:block;font-size:10px;padding:5px 0 2px}.variant-preview[aria-pressed=true]{border-color:#294979;background:#edf2f9;color:#233d67}.variant-preview:focus-visible{outline-offset:2px}.meaning-choices{border-top:1px solid var(--line);margin-top:12px;padding-top:10px;color:#425775;font-size:11px}.meaning-choices summary{cursor:pointer;line-height:1.5}.meaning-choices[open] summary{margin-bottom:8px}#meaning-options{display:flex;gap:6px;flex-wrap:wrap}.meaning-choice{flex:1 1 145px;display:block;text-align:left;font-size:11px;line-height:1.4;padding:9px 10px;border:1px solid var(--line);border-radius:6px;background:#fff;color:#303946}.meaning-choice span{display:block;font-size:10px;color:#646f7f;margin-top:4px}.meaning-choice[aria-pressed=true]{background:#edf2f9;border-color:#8aa2c3}
+@media(max-width:1150px){.canvas-bar>.document-meta{max-width:45%}.document-meta #document-name{max-width:18ch}.project-menu summary{padding:9px 10px}.source-label{display:none}}
+@media(max-width:800px){.project-menu{font-size:10px}.project-menu summary{padding:9px}.document-meta #document-name{max-width:17ch}.canvas-bar>.document-meta{max-width:48%}.variant-preview svg{height:62px}.canvas-bar{align-items:center}.meaning-choice{flex-basis:100%}.top-actions{gap:6px}}
 </style></head>
 <body>
 <header class="topbar">
   <a class="brand" href="#" aria-label="Сборка, начало"><span class="brandmark" aria-hidden="true">◧</span><strong>сборка<span class="brand-dot">.</span></strong><span class="brand-caption">векторная студия</span></a>
-  <div class="top-actions"><span class="source-label">Библиотека тестового · S / L</span><button class="button quiet" id="help-button">Как это работает</button><button class="button primary" id="export-button">Скачать SVG <span aria-hidden="true">↗</span></button><button class="button primary" id="figma-insert" hidden>Добавить в Figma ↗</button></div>
+  <div class="top-actions"><span class="source-label">Библиотека тестового · S / L</span><details class="project-menu" id="project-menu"><summary>Проект</summary><div class="project-menu-panel"><button id="save-project">Сохранить проект…</button><button id="open-project">Открыть проект…</button><p>JSON сохраняет предметы и все ручные правки.</p></div></details><input id="project-file" type="file" accept=".json,application/json" hidden><button class="button quiet" id="help-button">Как это работает</button><button class="button primary" id="export-button">Скачать SVG <span aria-hidden="true">↗</span></button><button class="button primary" id="figma-insert" hidden>Добавить в Figma ↗</button></div>
 </header>
 <main class="studio">
   <aside class="library-panel panel">
@@ -27,13 +30,14 @@
       <div class="mode-tabs" role="tablist" aria-label="Способ сборки"><button id="meaning-tab" role="tab" aria-selected="true" class="active">По смыслу</button><button id="components-tab" role="tab" aria-selected="false">По объектам</button><span class="local-label" id="engine-label">Проверка модели…</span></div>
       <div class="prompt-row"><label class="sr-only" for="prompt">Заголовок или метафора</label><textarea id="prompt" rows="2" maxlength="500" placeholder="О чём ваша иллюстрация?">Учиться и сохранять фокус</textarea><button id="generate" class="button primary">Собрать <span aria-hidden="true">↗</span></button></div>
       <div class="prompt-footer"><span id="prompt-hint">Заголовок → подбор объектов → композиция</span><div class="examples"><button data-prompt="Как накопить деньги">Накопления</button><button data-prompt="Работать в команде над проектом">Командная работа</button></div></div>
+      <details id="meaning-choices" class="meaning-choices" hidden><summary id="meaning-summary">Уточните смысл</summary><div id="meaning-options"></div></details>
     </div>
-    <div class="canvas-bar"><div><span class="document-dot"></span><strong id="document-name">Композиция 01</strong><span id="canvas-size">1200 × 630</span></div><div class="canvas-actions"><button class="icon-button" id="undo" title="Отменить (Ctrl+Z)" aria-label="Отменить" disabled>↶</button><button class="icon-button" id="redo" title="Повторить (Ctrl+Shift+Z)" aria-label="Повторить" disabled>↷</button><span class="divider"></span><button class="button text" id="variant">Другой вариант ↻</button></div></div>
+    <div class="canvas-bar"><div class="document-meta"><span class="document-dot"></span><strong id="document-name">Композиция</strong><span id="canvas-size">1200 × 630</span><span id="save-state" role="status">Автосохранение</span></div><div class="canvas-actions"><button class="icon-button" id="undo" title="Отменить (Ctrl+Z)" aria-label="Отменить" disabled>↶</button><button class="icon-button" id="redo" title="Повторить (Ctrl+Shift+Z)" aria-label="Повторить" disabled>↷</button><span class="divider"></span><button class="button text" id="variant">Другой вариант ↻</button></div></div>
     <div class="canvas-well"><div id="artboard" tabindex="0" aria-label="Холст. Выберите объект для редактирования"></div><div class="canvas-caption"><span id="canvas-message">Выберите объект на холсте, чтобы изменить его</span><span>SVG · редактируемый вектор</span></div></div>
     <div class="workspace-status" id="status" role="status" aria-live="polite">Готово к сборке</div>
   </section>
   <aside class="properties-panel panel" aria-label="Параметры композиции">
-    <section class="property-section"><h2>Холст</h2><label class="field-label" for="format">Формат</label><select id="format"><option value="1200,630">Обложка · 1200 × 630</option><option value="1080,1080">Квадрат · 1080 × 1080</option><option value="1080,1440">Постер · 1080 × 1440</option><option value="custom">Свой размер</option></select><div id="custom-size" class="two-fields" hidden><label>Ширина<input id="width" type="number" min="200" max="4096" value="1200"></label><label>Высота<input id="height" type="number" min="200" max="4096" value="630"></label><button class="button quiet" id="apply-size">Применить</button></div><div class="label-row"><span>Детализация</span><div class="segmented" role="group" aria-label="Детализация"><button data-detail="S">S</button><button data-detail="L" class="active">L</button></div></div><label class="field-label" for="layout">Расположение</label><select id="layout"><option value="balanced">Собранно</option><option value="diagonal">Со смещением</option><option value="title">Место под заголовок</option></select></section>
+    <section class="property-section"><h2>Холст</h2><label class="field-label" for="format">Формат</label><select id="format"><option value="1200,630">Обложка · 1200 × 630</option><option value="1080,1080">Квадрат · 1080 × 1080</option><option value="1080,1440">Постер · 1080 × 1440</option><option value="custom">Свой размер</option></select><div id="custom-size" class="two-fields" hidden><label>Ширина<input id="width" type="number" min="200" max="4096" value="1200"></label><label>Высота<input id="height" type="number" min="200" max="4096" value="630"></label><button class="button quiet" id="apply-size">Применить</button></div><div class="label-row"><span>Детализация</span><div class="segmented" role="group" aria-label="Детализация"><button data-detail="S">S</button><button data-detail="L" class="active">L</button></div></div><label class="field-label" for="layout">Расположение</label><select id="layout"><option value="balanced">Собранно</option><option value="diagonal">Со смещением</option><option value="title">Место под заголовок</option></select><p class="field-label">Варианты композиции</p><div id="variant-previews" class="variant-previews" aria-label="Варианты композиции"></div></section>
     <section class="property-section"><div class="section-title"><h2>Цветовая схема</h2><button class="link-button" id="import-palette">Загрузить</button></div><div id="palettes"></div><input id="palette-file" type="file" accept=".json,application/json" hidden><label class="checkbox-row"><input type="checkbox" id="background" checked><span>Декоративный фон</span></label><button id="palette-example" class="link-button muted-link">Скачать пример палитры ↓</button></section>
     <section class="property-section selection-section"><div class="section-title"><h2 id="selection-title">Объект</h2><span class="small-muted" id="selection-kind">не выбран</span></div><p id="selection-empty" class="panel-note">Нажмите на объект в композиции.</p><div id="selection-controls" hidden><label class="field-label" for="object-role">Состояние</label><select id="object-role"><option value="main">Главный · цветной</option><option value="background">Фоновый · монохромный</option></select><label class="field-label" for="rotation">Поворот <output id="rotation-value">0°</output></label><input id="rotation" type="range" min="-180" max="180" step="5" value="0"><div class="object-actions"><button class="button quiet" id="duplicate">Дублировать</button><button class="button quiet danger" id="delete">Удалить</button></div></div></section>
     <section class="property-section layers-section"><div class="section-title"><h2>Слои</h2><span class="small-muted">сверху → вниз</span></div><div id="layers"></div><div class="layer-actions"><button class="button quiet" id="layer-up">Выше ↑</button><button class="button quiet" id="layer-down">Ниже ↓</button></div></section>
@@ -94,7 +98,8 @@ function createScene(options, catalog) {
   if(!Number.isFinite(width)||!Number.isFinite(height)||width<200||height<200||width>4096||height>4096) throw Error('Размер холста: от 200 до 4096 пикселей.');
   if(ids.length>MAX_ITEMS) throw Error(`В одной композиции допускается до ${MAX_ITEMS} экземпляров.`);
   const palette=validatePalette(options.palette||catalog.palettes[0]);
-  const scene={width,height,detail,layout,variant,palette,background,items:[]};
+  const backgroundStyle=options.backgroundStyle??Math.max(0,catalog.palettes.findIndex(p=>p.id===palette.id));
+  const scene={width,height,detail,layout,variant,palette,background,backgroundStyle,items:[]};
   const ordered=ids.map((id,i)=>({id,role:options.roles?.[i]||'main'}));
   if(variant%2 && ordered.length>1) ordered.push(ordered.shift());
   scene.items=ordered.map(({id,role})=>({uid:`object-${++sequence}`,assetId:id,role,x:0,y:0,scale:1,rotation:0}));
@@ -105,25 +110,37 @@ function arrangeScene(scene,catalog) {
   if(!scene.items.length) return scene;
   scene.items.sort((a,b)=>Number(a.role==='main')-Number(b.role==='main'));
   const margin=Math.min(scene.width,scene.height)*0.065;
-  const area={x:scene.layout==='title'?scene.width*0.38:margin,y:margin,w:scene.width-(scene.layout==='title'?scene.width*0.38:margin)-margin,h:scene.height-2*margin};
+  const portraitTitle=scene.layout==='title'&&scene.height>scene.width;
+  const area={x:scene.layout==='title'&&!portraitTitle?scene.width*0.38:margin,y:portraitTitle?scene.height*.28:margin};
+  area.w=scene.width-area.x-margin;area.h=scene.height-area.y-margin;
   const assets=scene.items.map(item=>getAsset(item,scene,catalog));
-  if(scene.items.length<=3 && scene.items.some(item=>item.role==='background')){
+  if(scene.items.length>=2&&scene.items.length<=5){
     const main=scene.items.map((item,i)=>({item,i,asset:assets[i]})).filter(x=>x.item.role==='main').sort((a,b)=>b.asset.width*b.asset.height-a.asset.width*a.asset.height);
-    const hero=main[0]||{i:0,asset:assets[0]};
+    const hero=main[0]||scene.items.map((item,i)=>({item,i,asset:assets[i]})).sort((a,b)=>b.asset.width*b.asset.height-a.asset.width*a.asset.height)[0];
     const maxW=Math.max(...assets.map(a=>a.width)),maxH=Math.max(...assets.map(a=>a.height));
     const positions=assets.map(()=>({x:0,y:0}));
-    positions[hero.i]={x:maxW*.16,y:maxH*.30};
-    for(const other of main.slice(1))positions[other.i]=scene.height>scene.width*1.1
-      ?{x:positions[hero.i].x+hero.asset.width*.52,y:positions[hero.i].y+hero.asset.height*.78}
-      :{x:positions[hero.i].x+hero.asset.width*.83,y:maxH*.08};
-    if(scene.layout==='diagonal')for(const other of main.slice(1))positions[other.i].y+=maxH*.25;
+    const variant=((scene.variant||0)%3+3)%3,tall=area.h>area.w*1.1;
+    const backgrounds=scene.items.map((item,i)=>({item,i})).filter(x=>x.item.role==='background'&&x.i!==hero.i);
+    positions[hero.i]=[{x:maxW*.16,y:maxH*.30},{x:maxW*.52,y:maxH*.18},{x:0,y:0}][variant];
+    backgrounds.forEach(({i},k)=>{positions[i]=[{x:k*maxW*.22,y:k*maxH*.16},{x:maxW*.10+k*maxW*.25,y:k*maxH*.20},{x:maxW*.33+k*maxW*.20,y:maxH*.16+k*maxH*.24}][variant];});
+    const others=main.length?main.slice(1):assets.map((asset,i)=>({asset,i})).filter(x=>x.i!==hero.i);
+    others.forEach((other,k)=>{
+      const h=positions[hero.i];
+      positions[other.i]=variant===0
+        ?tall?{x:h.x+hero.asset.width*(k%2?.02:.52),y:h.y+hero.asset.height*(.76+k*.48)}:{x:h.x+hero.asset.width*(.83+(k%2)*.62),y:maxH*(.08+Math.floor(k/2)*.72)}
+        :variant===1
+          ?tall?{x:maxW*(k%2?.72:0),y:h.y+hero.asset.height*(.76+Math.floor(k/2)*.60)}:{x:maxW*(k%2?.74:0),y:maxH*(.05+Math.floor(k/2)*.74)}
+          :{x:h.x+hero.asset.width*(.78+(k%2)*.56),y:h.y+hero.asset.height*(.68+Math.floor(k/2)*.65)};
+      if(scene.layout==='diagonal')positions[other.i].y+=maxH*(.20+k*.12);
+    });
     const w=Math.max(...assets.map((a,i)=>positions[i].x+a.width));
     const h=Math.max(...assets.map((a,i)=>positions[i].y+a.height));
     const scale=Math.min(area.w/w,area.h/h),offsetX=area.x+(area.w-w*scale)/2,offsetY=area.y+(area.h-h*scale)/2;
     scene.items.forEach((item,i)=>{item.x=n(offsetX+positions[i].x*scale);item.y=n(offsetY+positions[i].y*scale);item.scale=scale;item.rotation=0;});
     return scene;
   }
-  const gap=80;
+  const variant=((scene.variant||0)%3+3)%3;
+  const gap=80+variant*100;
   let best=null;
   for(let cols=1;cols<=assets.length;cols++) {
     const rows=[];
@@ -132,12 +149,13 @@ function arrangeScene(scene,catalog) {
       rows.push({start:i,w:slice.reduce((sum,a)=>sum+a.width,0)+gap*(slice.length-1),h:Math.max(...slice.map(a=>a.height))});
     }
     const w=Math.max(...rows.map(r=>r.w));const h=rows.reduce((sum,r)=>sum+r.h,0)+gap*(rows.length-1);
-    const scale=Math.min(area.w/w,area.h/h);
+    const scale=Math.min(area.w/w,area.h/h)*(assets.length===1?1-variant*.14:1);
     if(!best||scale>best.scale) best={rows,w,h,scale};
   }
-  let y=area.y+(area.h-best.h*best.scale)/2;
+  const alignment=assets.length===1?[.5,.2,.8][variant]:.5;
+  let y=area.y+(area.h-best.h*best.scale)*alignment;
   for(const row of best.rows) {
-    let x=area.x+(area.w-row.w*best.scale)/2;
+    let x=area.x+(area.w-row.w*best.scale)*alignment;
     // Rows own an explicit range; avoid inferred counts when the final row is shorter.
     const next=best.rows.find(r=>r.start>row.start)?.start??assets.length;
     for(let i=row.start;i<next;i++) {
@@ -148,6 +166,14 @@ function arrangeScene(scene,catalog) {
     y+=(row.h+gap)*best.scale;
   }
   return scene;
+}
+
+function compositionVariant(scene,catalog,variant){
+  return arrangeScene({...scene,variant:((variant%3)+3)%3,items:scene.items.map(item=>({...item}))},catalog);
+}
+
+function compositionPreview(scene,catalog,prefix){
+  return prefixIds(renderSVG(scene,catalog),prefix);
 }
 
 function setDetail(scene, detail, catalog) {
@@ -179,7 +205,7 @@ function renderSVG(scene,catalog,{interactive=false}={}) {
   const palette=validatePalette(scene.palette);
   let bg=`<rect width="${scene.width}" height="${scene.height}" fill="${palette.background[0]}"/>`;
   if(scene.background) {
-    const index=Math.max(0,catalog.palettes.findIndex(x=>x.id===palette.id));
+    const index=Number.isInteger(scene.backgroundStyle)&&scene.backgroundStyle>=0&&scene.backgroundStyle<catalog.backgrounds[scene.detail].length?scene.backgroundStyle:Math.max(0,catalog.palettes.findIndex(x=>x.id===palette.id));
     const a=catalog.backgrounds[scene.detail][index];
     const backgroundPalette={...palette,objects:catalog.palettes[index].objects};
     const body=prefixIds(recolor(a.body,catalog.palettes[index],backgroundPalette),'backdrop');
@@ -196,20 +222,61 @@ function thumbnail(object,detail,role,palette,catalog) {
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${a.x} ${a.y} ${a.width} ${a.height}" role="img" aria-label="${escapeXML(object.name)}">${prefixIds(recolor(a.body,catalog.palettes[0],palette),`thumb-${object.id}-${role}`)}</svg>`;
 }
 
+
+const projectLibrary='4MCFttsSoP7hgQh29zq5G3';
+const projectNumber=(value,min,max)=>typeof value==='number'&&Number.isFinite(value)&&value>=min&&value<=max;
+
+function restoreProject(text,catalog){
+  if(typeof text!=='string'||text.length>1000000)throw Error('Проект должен быть JSON-файлом до 1 МБ.');
+  let data;try{data=JSON.parse(text);}catch{throw Error('Не удалось прочитать JSON проекта.');}
+  if(!data||data.version!==1||data.library!==projectLibrary)throw Error('Неподдерживаемая версия или библиотека проекта.');
+  const s=data.scene;
+  if(!s||!projectNumber(s.width,200,4096)||!projectNumber(s.height,200,4096)||!['S','L'].includes(s.detail)||!['balanced','diagonal','title'].includes(s.layout)||!Number.isInteger(s.variant)||s.variant<0||s.variant>1000000||typeof s.background!=='boolean')throw Error('Некорректные параметры холста.');
+  if(!Array.isArray(s.items)||s.items.length>MAX_ITEMS)throw Error(`В проекте допускается до ${MAX_ITEMS} предметов.`);
+  const ids=new Set(catalog.objects.map(o=>o.id));
+  const items=s.items.map((item,index)=>{
+    if(!item||!ids.has(item.assetId)||!['main','background'].includes(item.role))throw Error('Проект содержит неизвестный предмет или состояние.');
+    if(!projectNumber(item.x,-100000,100000)||!projectNumber(item.y,-100000,100000)||!projectNumber(item.scale,.00001,100)||!projectNumber(item.rotation,-180,180))throw Error('Некорректное положение, масштаб или поворот предмета.');
+    return {uid:`restored-${index+1}`,assetId:item.assetId,role:item.role,x:item.x,y:item.y,scale:item.scale,rotation:item.rotation};
+  });
+  if(items.some(item=>Math.abs(item.scale-items[0].scale)>1e-8))throw Error('Все предметы должны сохранять общий масштаб.');
+  const palette=validatePalette(s.palette);
+  if(s.backgroundStyle!==undefined&&(!Number.isInteger(s.backgroundStyle)||s.backgroundStyle<0||s.backgroundStyle>2))throw Error('Неизвестный вариант декоративного фона.');
+  const backgroundStyle=s.backgroundStyle??Math.max(0,catalog.palettes.findIndex(p=>p.id===palette.id));
+  const scene={width:s.width,height:s.height,detail:s.detail,layout:s.layout,variant:s.variant,background:s.background,backgroundStyle,palette,title:String(s.title||'').slice(0,500),items};
+  const ui={mode:data.ui?.mode==='components'?'components':'meaning',prompt:typeof data.ui?.prompt==='string'?data.ui.prompt.slice(0,500):scene.title};
+  return {scene,ui};
+}
+
+function projectChosenIds(restored,catalog){
+  return restored.ui.mode==='components'?selectObjects(restored.ui.prompt,catalog,'components').ids:restored.scene.items.map(i=>i.assetId);
+}
+
+function serializeProject(scene,ui,catalog){
+  const text=JSON.stringify({version:1,library:projectLibrary,scene,ui},null,2);
+  // Round-trip validation also strips unrelated fields and never imports SVG markup.
+  const clean=restoreProject(text,catalog);
+  return JSON.stringify({version:1,library:projectLibrary,...clean},null,2);
+}
+
 // Shared UI. Semantic requests go only to the local studio API.
 const $=id=>document.getElementById(id);
 const clone=value=>JSON.parse(JSON.stringify(value));
 const catalog=CATALOG;
 const isFigma=window.parent!==window;
 let mode='meaning',chosen=new Set(['book','lamp','headphones']),selected=null,history=[],future=[],drag=null,buildVersion=0;
+let previewKey='';
+const storageKey='illustration-studio.project.v1';
 const apiBase=location.protocol==='file:'||isFigma?'http://127.0.0.1:4173':'';
 let scene=createScene({ids:[...chosen],roles:['main','main','background'],width:1200,height:630,detail:'L'},catalog);
 scene.title='Учиться и сохранять фокус';
 const palettes=[...catalog.palettes];
 
 function status(text,error=false){$('status').textContent=text;$('status').classList.toggle('error',error);}
-function remember(){history.push(clone(scene));if(history.length>40)history.shift();future=[];}
-function changed(message){render();if(message)status(message);}
+function cancelBuild(){buildVersion++;$('generate').disabled=false;$('generate').innerHTML='Собрать <span aria-hidden="true">↗</span>';$('meaning-choices').hidden=true;}
+function remember(){cancelBuild();history.push(clone(scene));if(history.length>40)history.shift();future=[];}
+function persistProject(){try{localStorage.setItem(storageKey,serializeProject(scene,{mode,prompt:$('prompt').value},catalog));$('save-state').textContent='Сохранено в браузере';}catch{$('save-state').textContent='Сохраните проект в файл';}}
+function changed(message){render();persistProject();if(message)status(message);}
 function objectFor(item){return catalog.objects.find(o=>o.id===item.assetId);}
 function current(){return scene.items.find(x=>x.uid===selected);}
 function renderLibrary(){
@@ -224,7 +291,7 @@ function renderPalettes(){
     const swatches=document.createElement('span');swatches.className='swatches';
     [...p.background,...p.objects.slice(0,3)].forEach(c=>{const el=document.createElement('i');el.style.background=c;swatches.append(el);});
     const check=document.createElement('span');check.className='palette-check';check.textContent=p.id===scene.palette.id?'✓':'';button.append(label,swatches,check);
-    button.addEventListener('click',()=>{remember();scene.palette=clone(p);changed(`Палитра «${p.name}» применена ко всей композиции.`);});$('palettes').append(button);
+    button.addEventListener('click',()=>{remember();scene.palette=clone(p);scene.backgroundStyle=Math.max(0,catalog.palettes.findIndex(x=>x.id===p.id));changed(`Палитра «${p.name}» применена ко всей композиции.`);});$('palettes').append(button);
   }
 }
 function renderInspector(){
@@ -244,8 +311,16 @@ function draw(){
   $('artboard').style.maxWidth=`${maxHeight*scene.width/scene.height}px`;
   selectionBox();
 }
+function renderPreviews(){
+  $('variant').disabled=!scene.items.length;
+  const key=JSON.stringify([scene.width,scene.height,scene.detail,scene.layout,scene.background,scene.backgroundStyle,scene.palette,scene.items.map(i=>[i.assetId,i.role])]);
+  const options=[0,1,2].map(i=>compositionVariant(scene,catalog,i));
+  if(key!==previewKey){previewKey=key;$('variant-previews').innerHTML=scene.items.length?options.map((s,i)=>`<button class="variant-preview" data-variant="${i}" aria-label="Вариант композиции ${i+1}">${compositionPreview(s,catalog,`preview-${i}`)}<span>${i+1}</span></button>`).join(''):'<span class="panel-note">Добавьте предметы в композицию.</span>';}
+  document.querySelectorAll('[data-variant]').forEach(button=>{const s=options[Number(button.dataset.variant)],active=scene.items.every((item,i)=>Math.abs(item.x-s.items[i].x)<.01&&Math.abs(item.y-s.items[i].y)<.01&&item.rotation===0);button.setAttribute('aria-pressed',String(active));});
+}
 function render(){
-  draw();renderLibrary();renderPalettes();renderInspector();$('canvas-size').textContent=`${scene.width} × ${scene.height}`;
+  draw();renderLibrary();renderPalettes();renderInspector();renderPreviews();$('canvas-size').textContent=`${scene.width} × ${scene.height}`;
+  $('document-name').textContent=scene.title||'Композиция';$('document-name').title=scene.title||'Композиция';
   document.querySelectorAll('[data-detail]').forEach(b=>{b.classList.toggle('active',b.dataset.detail===scene.detail);b.setAttribute('aria-pressed',String(b.dataset.detail===scene.detail));});
   $('background').checked=scene.background;$('layout').value=scene.layout;$('undo').disabled=!history.length;$('redo').disabled=!future.length;
   const sizeValue=`${scene.width},${scene.height}`;
@@ -254,6 +329,23 @@ function render(){
 }
 function download(text,name,type='image/svg+xml'){
   const url=URL.createObjectURL(new Blob([text],{type}));const a=document.createElement('a');a.href=url;a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
+}
+function applySelection(result,query){
+  remember();scene=createScene({ids:result.ids,roles:result.roles,width:scene.width,height:scene.height,detail:scene.detail,palette:scene.palette,layout:scene.layout,background:scene.background,backgroundStyle:scene.backgroundStyle,variant:scene.variant},catalog);
+  scene.title=query.trim().slice(0,160)||'Композиция';scene.semantic=result.engine?{theme:result.theme,themeName:result.themeName,engine:result.engine}:null;chosen=new Set(result.ids);selected=null;changed(`${result.ids.length} объекта · ${result.themeName||result.explanation}`);
+}
+function showMeaningChoices(result,query,version,needsReview){
+  if(!result.alternatives?.length)return;
+  $('meaning-choices').hidden=false;$('meaning-choices').open=needsReview;
+  $('meaning-summary').textContent=needsReview?'Подбор приблизительный — выберите смысл':`Тема: ${scene.semantic?.themeName||result.themeName}`;
+  $('meaning-options').replaceChildren();
+  for(const alternative of result.alternatives){
+    const button=document.createElement('button');button.className='meaning-choice';button.textContent=alternative.themeName;
+    const objects=document.createElement('span');objects.textContent=alternative.ids.map(id=>catalog.objects.find(o=>o.id===id).name).join(' · ');button.append(objects);
+    button.setAttribute('aria-pressed',String(!needsReview&&alternative.theme===scene.semantic?.theme));
+    button.onclick=()=>{if(version!==buildVersion)return;applySelection({...alternative,engine:result.engine},query);showMeaningChoices(result,query,buildVersion,false);};
+    $('meaning-options').append(button);
+  }
 }
 async function build(){
   const version=++buildVersion;const query=$('prompt').value;
@@ -267,26 +359,30 @@ async function build(){
     }
     else {
       const typed=selectObjects($('prompt').value,catalog,'components');
-      result={ids:chosen.size?[...chosen]:typed.ids,explanation:'Собрано из выбранных объектов.'};
+      result={ids:typed.ids,explanation:'Собрано из выбранных объектов.'};
     }
     if(version!==buildVersion)return;
     if(!result.ids.length){status(result.explanation||'Выберите объекты в библиотеке.',true);return;}
-    remember();scene=createScene({ids:result.ids,roles:result.roles,width:scene.width,height:scene.height,detail:scene.detail,palette:scene.palette,layout:scene.layout,background:scene.background,variant:scene.variant},catalog);
-    scene.title=query.trim().slice(0,160)||'Композиция';scene.semantic=result.engine?{theme:result.theme,engine:result.engine}:null;chosen=new Set(result.ids);selected=null;changed(`${result.ids.length} объекта · ${result.explanation}`);
+    if(result.needsReview){showMeaningChoices(result,query,version,true);status('Уточните смысл в предложениях выше. Текущая композиция сохранена.');return;}
+    applySelection(result,query);showMeaningChoices(result,query,buildVersion,false);
   }catch(error){if(version===buildVersion)status(error.message,true);}
   finally{if(version===buildVersion){$('generate').disabled=false;$('generate').innerHTML='Собрать <span aria-hidden="true">↗</span>';}}
 }
 function setMode(next){
-  buildVersion++;$('generate').disabled=false;$('generate').innerHTML='Собрать <span aria-hidden="true">↗</span>';
+  cancelBuild();
   mode=next;
+  renderMode();
+  $('prompt').value=mode==='meaning'?'':catalog.objects.filter(x=>chosen.has(x.id)).map(x=>x.name).join(', ');
+  persistProject();
+}
+function renderMode(){
   for(const m of ['meaning','components']){$(`${m}-tab`).classList.toggle('active',m===mode);$(`${m}-tab`).setAttribute('aria-selected',String(m===mode));}
   $('prompt').placeholder=mode==='meaning'?'О чём ваша иллюстрация?':'Например: книга, телефон, пазлы';
-  $('prompt').value=mode==='meaning'?'':catalog.objects.filter(x=>chosen.has(x.id)).map(x=>x.name).join(', ');
   $('prompt-hint').textContent=mode==='meaning'?'Заголовок → подбор объектов → композиция':'Выбор в библиотеке или названия через запятую';
 }
 $('meaning-tab').onclick=()=>setMode('meaning');$('components-tab').onclick=()=>setMode('components');$('generate').onclick=build;
 $('prompt').addEventListener('keydown',e=>{if(e.key==='Enter'&&(e.ctrlKey||e.metaKey)){e.preventDefault();build();}});
-$('prompt').addEventListener('input',()=>{buildVersion++;$('generate').disabled=false;$('generate').innerHTML='Собрать <span aria-hidden="true">↗</span>';if(mode==='components'){chosen=new Set(selectObjects($('prompt').value,catalog,'components').ids);renderLibrary();}});
+$('prompt').addEventListener('input',()=>{cancelBuild();if(mode==='components'){chosen=new Set(selectObjects($('prompt').value,catalog,'components').ids);renderLibrary();}persistProject();});
 document.querySelectorAll('[data-prompt]').forEach(b=>b.onclick=()=>{if(mode!=='meaning')setMode('meaning');$('prompt').value=b.dataset.prompt;build();});
 $('library-search').oninput=renderLibrary;
 $('library').onclick=e=>{
@@ -294,13 +390,16 @@ $('library').onclick=e=>{
   chosen.has(id)?chosen.delete(id):chosen.add(id);renderLibrary();
   if(mode!=='components')setMode('components');
   $('prompt').value=catalog.objects.filter(x=>chosen.has(x.id)).map(x=>x.name).join(', ');
+  persistProject();
   status(`${chosen.size} объектов выбрано. Нажмите «Собрать».`);
 };
-$('variant').onclick=()=>{remember();scene.variant++;const items=[...scene.items];if(items.length>1)items.push(items.shift());scene.items=items;scene.layout=['balanced','diagonal','title'][scene.variant%3];arrangeScene(scene,catalog);changed('Новый вариант расположения готов.');};
+function chooseVariant(index){remember();scene=compositionVariant(scene,catalog,index);selected=null;changed(`Вариант ${scene.variant+1} из 3. Формат и выбранное расположение сохранены.`);}
+$('variant').onclick=()=>chooseVariant((scene.variant||0)+1);
+$('variant-previews').onclick=e=>{const button=e.target.closest('[data-variant]');if(button)chooseVariant(Number(button.dataset.variant));};
 document.querySelectorAll('[data-detail]').forEach(b=>b.onclick=()=>{if(scene.detail===b.dataset.detail)return;remember();scene=setDetail(scene,b.dataset.detail,catalog);changed(`Загружены исходные векторы ${scene.detail}. Раскладка пересчитана.`);});
 $('layout').onchange=()=>{remember();scene.layout=$('layout').value;arrangeScene(scene,catalog);changed('Расположение обновлено.');};
 function resize(width,height){
-  try{const next=createScene({ids:scene.items.map(x=>x.assetId),roles:scene.items.map(x=>x.role),width,height,detail:scene.detail,palette:scene.palette,layout:scene.layout,background:scene.background,allowEmpty:true},catalog);remember();scene={...next,title:scene.title};selected=null;changed('Композиция адаптирована под новый формат.');}catch(error){status(error.message,true);}
+  try{const next=createScene({ids:scene.items.map(x=>x.assetId),roles:scene.items.map(x=>x.role),width,height,detail:scene.detail,palette:scene.palette,layout:scene.layout,background:scene.background,backgroundStyle:scene.backgroundStyle,variant:scene.variant,allowEmpty:true},catalog);remember();scene={...next,title:scene.title};selected=null;changed('Композиция адаптирована под новый формат.');}catch(error){status(error.message,true);}
 }
 $('format').onchange=()=>{const custom=$('format').value==='custom';$('custom-size').hidden=!custom;if(!custom)resize(...$('format').value.split(',').map(Number));};
 $('apply-size').onclick=()=>resize(Number($('width').value),Number($('height').value));
@@ -308,7 +407,7 @@ $('background').onchange=()=>{remember();scene.background=$('background').checke
 $('import-palette').onclick=()=>$('palette-file').click();
 $('palette-file').onchange=async()=>{
   const file=$('palette-file').files[0];if(!file)return;
-  try{if(file.size>50000)throw Error('Файл палитры слишком большой. Максимум 50 КБ.');const p=validatePalette(JSON.parse(await file.text()));p.id=`custom-${Date.now()}`;remember();palettes.push(p);scene.palette=p;changed(`Палитра «${p.name}» загружена.`);}catch(error){status(`Не удалось загрузить палитру: ${error.message}`,true);}finally{$('palette-file').value='';}
+  try{if(file.size>50000)throw Error('Файл палитры слишком большой. Максимум 50 КБ.');const p=validatePalette(JSON.parse(await file.text()));p.id=`custom-${Date.now()}`;remember();palettes.push(p);scene.palette=p;scene.backgroundStyle=0;changed(`Палитра «${p.name}» загружена.`);}catch(error){status(`Не удалось загрузить палитру: ${error.message}`,true);}finally{$('palette-file').value='';}
 };
 $('palette-example').onclick=()=>download(JSON.stringify({name:'Моя палитра',background:['#D7CDF5','#AA9BF0','#7864D7'],objects:['#F9ECB0','#F9A3AA','#FFE3E1','#181817','#FFFFFF']},null,2),'palette-example.json','application/json');
 $('layers').onclick=e=>{const b=e.target.closest('[data-layer]');if(!b)return;selected=b.dataset.layer;renderInspector();selectionBox();};
@@ -322,15 +421,15 @@ function removeSelected(){if(!current())return;remember();scene.items=scene.item
 $('delete').onclick=removeSelected;
 function moveLayer(delta){const index=scene.items.findIndex(x=>x.uid===selected),next=index+delta;if(index<0||next<0||next>=scene.items.length)return;remember();[scene.items[index],scene.items[next]]=[scene.items[next],scene.items[index]];changed('Порядок слоёв изменён.');}
 $('layer-up').onclick=()=>moveLayer(1);$('layer-down').onclick=()=>moveLayer(-1);
-function undo(){if(!history.length)return;future.push(clone(scene));scene=history.pop();selected=null;changed('Действие отменено.');}
-function redo(){if(!future.length)return;history.push(clone(scene));scene=future.pop();selected=null;changed('Действие повторено.');}
+function undo(){if(!history.length)return;cancelBuild();future.push(clone(scene));scene=history.pop();chosen=new Set(projectChosenIds({scene,ui:{mode,prompt:$('prompt').value}},catalog));selected=null;changed('Действие отменено.');}
+function redo(){if(!future.length)return;cancelBuild();history.push(clone(scene));scene=future.pop();chosen=new Set(projectChosenIds({scene,ui:{mode,prompt:$('prompt').value}},catalog));selected=null;changed('Действие повторено.');}
 $('undo').onclick=undo;$('redo').onclick=redo;
 $('artboard').addEventListener('pointerdown',e=>{
   const group=e.target.closest('g[data-object]');selected=group?.id||null;renderInspector();selectionBox();if(!selected)return;
   const rect=$('artboard').getBoundingClientRect();const item=current();remember();drag={clientX:e.clientX,clientY:e.clientY,x:item.x,y:item.y,ratio:scene.width/rect.width,pointerId:e.pointerId};$('artboard').setPointerCapture(e.pointerId);$('artboard').classList.add('dragging');e.preventDefault();
 });
 $('artboard').addEventListener('pointermove',e=>{if(!drag||!current())return;const item=current();item.x=drag.x+(e.clientX-drag.clientX)*drag.ratio;item.y=drag.y+(e.clientY-drag.clientY)*drag.ratio;draw();});
-function endDrag(){if(!drag)return;drag=null;$('artboard').classList.remove('dragging');renderInspector();$('undo').disabled=!history.length;$('redo').disabled=true;status('Положение изменено. Объекты за краем холста обрезаются при экспорте.');}
+function endDrag(){if(!drag)return;drag=null;$('artboard').classList.remove('dragging');renderInspector();renderPreviews();persistProject();$('undo').disabled=!history.length;$('redo').disabled=true;status('Положение изменено. Объекты за краем холста обрезаются при экспорте.');}
 $('artboard').addEventListener('pointerup',endDrag);$('artboard').addEventListener('pointercancel',endDrag);
 document.addEventListener('keydown',e=>{
   if(['INPUT','TEXTAREA','SELECT'].includes(e.target.tagName))return;
@@ -340,6 +439,15 @@ document.addEventListener('keydown',e=>{
   if(current()&&moves[e.key]){e.preventDefault();remember();const [x,y]=moves[e.key],step=e.shiftKey?10:1;current().x+=x*step;current().y+=y*step;changed();}
 });
 $('export-button').onclick=()=>{download(renderSVG(scene,catalog),'composition.svg');status('SVG подготовлен к скачиванию.');};
+$('save-project').onclick=()=>{try{download(serializeProject(scene,{mode,prompt:$('prompt').value},catalog),'composition.sbor.json','application/json');$('project-menu').open=false;status('Проект подготовлен к скачиванию. Его можно открыть здесь и продолжить работу.');}catch(error){status(error.message,true);}};
+$('open-project').onclick=()=>{$('project-menu').open=false;$('project-file').click();};
+function adoptProject(restored){
+  scene=restored.scene;mode=restored.ui.mode;chosen=new Set(projectChosenIds(restored,catalog));selected=null;
+  const match=palettes.find(p=>p.id===scene.palette.id&&p.name===scene.palette.name&&JSON.stringify(p.background)===JSON.stringify(scene.palette.background)&&JSON.stringify(p.objects)===JSON.stringify(scene.palette.objects));
+  if(match)scene.palette=clone(match);else{scene.palette.id=`project-${Date.now()}`;palettes.push(clone(scene.palette));}
+  renderMode();$('prompt').value=restored.ui.prompt;
+}
+$('project-file').onchange=async()=>{const file=$('project-file').files[0];if(!file)return;try{if(file.size>1000000)throw Error('Максимальный размер проекта — 1 МБ.');const restored=restoreProject(await file.text(),catalog);remember();adoptProject(restored);changed('Проект открыт. Ручные положения, слои и палитра восстановлены.');}catch(error){status(`Не удалось открыть проект: ${error.message}`,true);}finally{$('project-file').value='';}};
 $('help-button').onclick=()=>$('help-dialog').showModal();$('close-help').onclick=()=>$('help-dialog').close();
 $('help-dialog').addEventListener('click',e=>{if(e.target===$('help-dialog'))$('help-dialog').close();});
 if(isFigma){$('figma-insert').hidden=false;$('export-native').hidden=false;$('export-button').classList.remove('primary');$('export-button').classList.add('quiet');}
@@ -347,7 +455,10 @@ $('figma-insert').onclick=()=>{parent.postMessage({pluginMessage:{type:'insert',
 $('export-native').onclick=()=>parent.postMessage({pluginMessage:{type:'export-selection'}},'*');
 window.addEventListener('message',e=>{const msg=e.data.pluginMessage;if(!msg)return;if(msg.type==='export-result')download(msg.svg,'figma-composition.svg');if(msg.type==='status')status(msg.text,!!msg.error);});
 new ResizeObserver(()=>draw()).observe($('artboard').parentElement);
-render();status('3 объекта · исходная библиотека L · палитра «Сирень».');
+let restoredDraft=false;
+try{const saved=localStorage.getItem(storageKey);if(saved){adoptProject(restoreProject(saved,catalog));restoredDraft=true;}}catch{$('save-state').textContent='Не удалось восстановить черновик';}
+render();status(restoredDraft?'Работа восстановлена из этого браузера.':'Выберите смысл, затем сравните три варианта композиции.');
+if(restoredDraft)$('save-state').textContent='Восстановлено из браузера';else persistProject();
 async function checkModel(attempt=0){
   try{const response=await fetch(apiBase+'/api/status',{signal:AbortSignal.timeout(3000)});if(!response.ok)throw Error();const data=await response.json();$('engine-label').textContent=data.ready?'Модель готова':data.error?'Нужен запуск модели':'Загрузка модели…';if(!data.ready&&!data.error&&attempt<15)setTimeout(()=>checkModel(attempt+1),1000);}
   catch{$('engine-label').textContent='Запустите START.cmd для подбора';}

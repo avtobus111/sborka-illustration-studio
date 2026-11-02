@@ -18,6 +18,17 @@ for(const [i,result]of results.entries()){
   const renderer=new Resvg(svg,{font:{loadSystemFonts:true,defaultFontFamily:'Segoe UI'}});
   fs.writeFileSync(path.join(directory,`step-${String(i+1).padStart(2,'0')}.png`),renderer.render().asPng());
 }
-const video=spawnSync('ffmpeg',['-hide_banner','-loglevel','error','-y','-framerate','1/7','-i',path.join(directory,'step-%02d.png'),'-c:v','libx264','-preset','medium','-crf','20','-r','30','-t','21','-pix_fmt','yuv420p','-movflags','+faststart',path.join(directory,'demo.mp4')],{windowsHide:true,stdio:'inherit'});
+const uiFiles=['ui-01.png','ui-02.png'];
+const captions=['Заголовок → исходные предметы → три композиции','Формат, палитра, S/L и ручной поворот'];
+let frame=0;
+if(uiFiles.every(file=>fs.existsSync(path.join(directory,file)))){
+  for(const [i,file]of uiFiles.entries()){
+    const png=fs.readFileSync(path.join(directory,file)).toString('base64');
+    const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080"><rect width="1920" height="1080" fill="#F4F5F7"/><text x="64" y="65" font-family="Segoe UI" font-size="32" font-weight="600" fill="#233D67">${escape(captions[i])}</text><image href="data:image/png;base64,${png}" x="160" y="100" width="1600" height="925" preserveAspectRatio="xMidYMid meet"/><text x="64" y="1053" font-family="Segoe UI" font-size="19" fill="#646F7F">Снимок реального интерфейса · пошаговый видеопоказ, не непрерывная запись экрана</text></svg>`;
+    fs.writeFileSync(path.join(directory,`video-${String(++frame).padStart(2,'0')}.png`),new Resvg(svg,{font:{loadSystemFonts:true,defaultFontFamily:'Segoe UI'}}).render().asPng());
+  }
+}
+for(let i=1;i<=3;i++)fs.copyFileSync(path.join(directory,`step-${String(i).padStart(2,'0')}.png`),path.join(directory,`video-${String(++frame).padStart(2,'0')}.png`));
+const video=spawnSync('ffmpeg',['-hide_banner','-loglevel','error','-y','-framerate','1/7','-i',path.join(directory,'video-%02d.png'),'-c:v','libx264','-preset','medium','-crf','20','-r','30','-t',String(frame*7),'-pix_fmt','yuv420p','-movflags','+faststart',path.join(directory,'demo.mp4')],{windowsHide:true,stdio:'inherit'});
 if(video.status!==0)throw Error('Не удалось собрать видео ffmpeg.');
-console.log('Demo: 3 real model outputs, 21 seconds.');
+console.log(`Demo: ${frame} steps, ${frame*7} seconds.`);

@@ -6,7 +6,7 @@
   "scripts": {
     "build": "node scripts/build.mjs",
     "start": "node scripts/serve.mjs",
-    "test": "node tests/core.test.mjs && node tests/semantic.test.mjs && node tests/server.test.mjs",
+    "test": "node tests/core.test.mjs && node tests/project.test.mjs && node tests/semantic.test.mjs && node tests/server.test.mjs",
     "setup:model": "node scripts/setup-model.mjs"
   },
   "dependencies": {

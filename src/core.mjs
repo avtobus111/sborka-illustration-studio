@@ -50,7 +50,8 @@ export function createScene(options, catalog) {
   if(!Number.isFinite(width)||!Number.isFinite(height)||width<200||height<200||width>4096||height>4096) throw Error('Размер холста: от 200 до 4096 пикселей.');
   if(ids.length>MAX_ITEMS) throw Error(`В одной композиции допускается до ${MAX_ITEMS} экземпляров.`);
   const palette=validatePalette(options.palette||catalog.palettes[0]);
-  const scene={width,height,detail,layout,variant,palette,background,items:[]};
+  const backgroundStyle=options.backgroundStyle??Math.max(0,catalog.palettes.findIndex(p=>p.id===palette.id));
+  const scene={width,height,detail,layout,variant,palette,background,backgroundStyle,items:[]};
   const ordered=ids.map((id,i)=>({id,role:options.roles?.[i]||'main'}));
   if(variant%2 && ordered.length>1) ordered.push(ordered.shift());
   scene.items=ordered.map(({id,role})=>({uid:`object-${++sequence}`,assetId:id,role,x:0,y:0,scale:1,rotation:0}));
@@ -61,25 +62,37 @@ export function arrangeScene(scene,catalog) {
   if(!scene.items.length) return scene;
   scene.items.sort((a,b)=>Number(a.role==='main')-Number(b.role==='main'));
   const margin=Math.min(scene.width,scene.height)*0.065;
-  const area={x:scene.layout==='title'?scene.width*0.38:margin,y:margin,w:scene.width-(scene.layout==='title'?scene.width*0.38:margin)-margin,h:scene.height-2*margin};
+  const portraitTitle=scene.layout==='title'&&scene.height>scene.width;
+  const area={x:scene.layout==='title'&&!portraitTitle?scene.width*0.38:margin,y:portraitTitle?scene.height*.28:margin};
+  area.w=scene.width-area.x-margin;area.h=scene.height-area.y-margin;
   const assets=scene.items.map(item=>getAsset(item,scene,catalog));
-  if(scene.items.length<=3 && scene.items.some(item=>item.role==='background')){
+  if(scene.items.length>=2&&scene.items.length<=5){
     const main=scene.items.map((item,i)=>({item,i,asset:assets[i]})).filter(x=>x.item.role==='main').sort((a,b)=>b.asset.width*b.asset.height-a.asset.width*a.asset.height);
-    const hero=main[0]||{i:0,asset:assets[0]};
+    const hero=main[0]||scene.items.map((item,i)=>({item,i,asset:assets[i]})).sort((a,b)=>b.asset.width*b.asset.height-a.asset.width*a.asset.height)[0];
     const maxW=Math.max(...assets.map(a=>a.width)),maxH=Math.max(...assets.map(a=>a.height));
     const positions=assets.map(()=>({x:0,y:0}));
-    positions[hero.i]={x:maxW*.16,y:maxH*.30};
-    for(const other of main.slice(1))positions[other.i]=scene.height>scene.width*1.1
-      ?{x:positions[hero.i].x+hero.asset.width*.52,y:positions[hero.i].y+hero.asset.height*.78}
-      :{x:positions[hero.i].x+hero.asset.width*.83,y:maxH*.08};
-    if(scene.layout==='diagonal')for(const other of main.slice(1))positions[other.i].y+=maxH*.25;
+    const variant=((scene.variant||0)%3+3)%3,tall=area.h>area.w*1.1;
+    const backgrounds=scene.items.map((item,i)=>({item,i})).filter(x=>x.item.role==='background'&&x.i!==hero.i);
+    positions[hero.i]=[{x:maxW*.16,y:maxH*.30},{x:maxW*.52,y:maxH*.18},{x:0,y:0}][variant];
+    backgrounds.forEach(({i},k)=>{positions[i]=[{x:k*maxW*.22,y:k*maxH*.16},{x:maxW*.10+k*maxW*.25,y:k*maxH*.20},{x:maxW*.33+k*maxW*.20,y:maxH*.16+k*maxH*.24}][variant];});
+    const others=main.length?main.slice(1):assets.map((asset,i)=>({asset,i})).filter(x=>x.i!==hero.i);
+    others.forEach((other,k)=>{
+      const h=positions[hero.i];
+      positions[other.i]=variant===0
+        ?tall?{x:h.x+hero.asset.width*(k%2?.02:.52),y:h.y+hero.asset.height*(.76+k*.48)}:{x:h.x+hero.asset.width*(.83+(k%2)*.62),y:maxH*(.08+Math.floor(k/2)*.72)}
+        :variant===1
+          ?tall?{x:maxW*(k%2?.72:0),y:h.y+hero.asset.height*(.76+Math.floor(k/2)*.60)}:{x:maxW*(k%2?.74:0),y:maxH*(.05+Math.floor(k/2)*.74)}
+          :{x:h.x+hero.asset.width*(.78+(k%2)*.56),y:h.y+hero.asset.height*(.68+Math.floor(k/2)*.65)};
+      if(scene.layout==='diagonal')positions[other.i].y+=maxH*(.20+k*.12);
+    });
     const w=Math.max(...assets.map((a,i)=>positions[i].x+a.width));
     const h=Math.max(...assets.map((a,i)=>positions[i].y+a.height));
     const scale=Math.min(area.w/w,area.h/h),offsetX=area.x+(area.w-w*scale)/2,offsetY=area.y+(area.h-h*scale)/2;
     scene.items.forEach((item,i)=>{item.x=n(offsetX+positions[i].x*scale);item.y=n(offsetY+positions[i].y*scale);item.scale=scale;item.rotation=0;});
     return scene;
   }
-  const gap=80;
+  const variant=((scene.variant||0)%3+3)%3;
+  const gap=80+variant*100;
   let best=null;
   for(let cols=1;cols<=assets.length;cols++) {
     const rows=[];
@@ -88,12 +101,13 @@ export function arrangeScene(scene,catalog) {
       rows.push({start:i,w:slice.reduce((sum,a)=>sum+a.width,0)+gap*(slice.length-1),h:Math.max(...slice.map(a=>a.height))});
     }
     const w=Math.max(...rows.map(r=>r.w));const h=rows.reduce((sum,r)=>sum+r.h,0)+gap*(rows.length-1);
-    const scale=Math.min(area.w/w,area.h/h);
+    const scale=Math.min(area.w/w,area.h/h)*(assets.length===1?1-variant*.14:1);
     if(!best||scale>best.scale) best={rows,w,h,scale};
   }
-  let y=area.y+(area.h-best.h*best.scale)/2;
+  const alignment=assets.length===1?[.5,.2,.8][variant]:.5;
+  let y=area.y+(area.h-best.h*best.scale)*alignment;
   for(const row of best.rows) {
-    let x=area.x+(area.w-row.w*best.scale)/2;
+    let x=area.x+(area.w-row.w*best.scale)*alignment;
     // Rows own an explicit range; avoid inferred counts when the final row is shorter.
     const next=best.rows.find(r=>r.start>row.start)?.start??assets.length;
     for(let i=row.start;i<next;i++) {
@@ -104,6 +118,14 @@ export function arrangeScene(scene,catalog) {
     y+=(row.h+gap)*best.scale;
   }
   return scene;
+}
+
+export function compositionVariant(scene,catalog,variant){
+  return arrangeScene({...scene,variant:((variant%3)+3)%3,items:scene.items.map(item=>({...item}))},catalog);
+}
+
+export function compositionPreview(scene,catalog,prefix){
+  return prefixIds(renderSVG(scene,catalog),prefix);
 }
 
 export function setDetail(scene, detail, catalog) {
@@ -135,7 +157,7 @@ export function renderSVG(scene,catalog,{interactive=false}={}) {
   const palette=validatePalette(scene.palette);
   let bg=`<rect width="${scene.width}" height="${scene.height}" fill="${palette.background[0]}"/>`;
   if(scene.background) {
-    const index=Math.max(0,catalog.palettes.findIndex(x=>x.id===palette.id));
+    const index=Number.isInteger(scene.backgroundStyle)&&scene.backgroundStyle>=0&&scene.backgroundStyle<catalog.backgrounds[scene.detail].length?scene.backgroundStyle:Math.max(0,catalog.palettes.findIndex(x=>x.id===palette.id));
     const a=catalog.backgrounds[scene.detail][index];
     const backgroundPalette={...palette,objects:catalog.palettes[index].objects};
     const body=prefixIds(recolor(a.body,catalog.palettes[index],backgroundPalette),'backdrop');

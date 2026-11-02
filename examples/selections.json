@@ -15,6 +15,54 @@
     "theme": "focus",
     "themeName": "Внимание и продуктивность",
     "confidence": 0.631,
+    "alternatives": [
+      {
+        "ids": [
+          "headphones",
+          "lamp",
+          "book"
+        ],
+        "roles": [
+          "main",
+          "main",
+          "background"
+        ],
+        "theme": "focus",
+        "themeName": "Внимание и продуктивность",
+        "confidence": 0.631
+      },
+      {
+        "ids": [
+          "book",
+          "lamp",
+          "headphones"
+        ],
+        "roles": [
+          "main",
+          "main",
+          "background"
+        ],
+        "theme": "learning",
+        "themeName": "Обучение и концентрация",
+        "confidence": 0.565
+      },
+      {
+        "ids": [
+          "lamp",
+          "pen",
+          "puzzle"
+        ],
+        "roles": [
+          "main",
+          "main",
+          "background"
+        ],
+        "theme": "ideas",
+        "themeName": "Идеи и творчество",
+        "confidence": 0.521
+      }
+    ],
+    "needsReview": false,
     "engine": "sentence-transformer",
     "model": "Xenova/paraphrase-multilingual-MiniLM-L12-v2",
     "explanation": "Внимание и продуктивность. Объекты подобраны локальной языковой моделью."
@@ -35,6 +83,54 @@
     "theme": "savings",
     "themeName": "Сбережения и финансовая цель",
     "confidence": 0.541,
+    "alternatives": [
+      {
+        "ids": [
+          "wallet",
+          "coin",
+          "folder"
+        ],
+        "roles": [
+          "main",
+          "main",
+          "background"
+        ],
+        "theme": "savings",
+        "themeName": "Сбережения и финансовая цель",
+        "confidence": 0.541
+      },
+      {
+        "ids": [
+          "lamp",
+          "pen",
+          "puzzle"
+        ],
+        "roles": [
+          "main",
+          "main",
+          "background"
+        ],
+        "theme": "ideas",
+        "themeName": "Идеи и творчество",
+        "confidence": 0.501
+      },
+      {
+        "ids": [
+          "folder",
+          "pen",
+          "lamp"
+        ],
+        "roles": [
+          "main",
+          "main",
+          "background"
+        ],
+        "theme": "planning",
+        "themeName": "Планы и цели",
+        "confidence": 0.473
+      }
+    ],
+    "needsReview": false,
     "engine": "sentence-transformer",
     "model": "Xenova/paraphrase-multilingual-MiniLM-L12-v2",
     "explanation": "Сбережения и финансовая цель. Объекты подобраны локальной языковой моделью."
@@ -55,6 +151,24 @@
     "theme": "communication",
     "themeName": "Общение и взаимопонимание",
     "confidence": 0.684,
+    "alternatives": [
+      {
+        "ids": [
+          "phone",
+          "puzzle",
+          "pen"
+        ],
+        "roles": [
+          "main",
+          "main",
+          "background"
+        ],
+        "theme": "communication",
+        "themeName": "Общение и взаимопонимание",
+        "confidence": 0.684
+      }
+    ],
+    "needsReview": false,
     "engine": "sentence-transformer",
     "model": "Xenova/paraphrase-multilingual-MiniLM-L12-v2",
     "explanation": "Общение и взаимопонимание. Объекты подобраны локальной языковой моделью."
