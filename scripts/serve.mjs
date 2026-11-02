@@ -3,6 +3,8 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {createSemanticSelector,MODEL_ID} from '../src/semantic.mjs';
+import {renderSVG} from '../src/core.mjs';
+import {restoreProject,serializeProject} from '../src/project.mjs';
 const project=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const catalog=JSON.parse(fs.readFileSync(path.join(project,'assets/catalog.json'),'utf8'));
 
@@ -15,6 +17,13 @@ export async function createStudioServer(){
       const url=new URL(req.url,'http://localhost');
       if(req.method==='OPTIONS'){res.writeHead(204,{'Access-Control-Allow-Origin':'*','Access-Control-Allow-Methods':'POST, GET, OPTIONS','Access-Control-Allow-Headers':'Content-Type'});res.end();return;}
       if(req.method==='GET'&&url.pathname==='/api/status'){send(200,state);return;}
+      if(req.method==='POST'&&['/api/export/svg','/api/export/project'].includes(url.pathname)){
+        let body='';for await(const chunk of req){body+=chunk;if(Buffer.byteLength(body)>1500000){send(413,{error:'Проект слишком большой.'});return;}}
+        let restored;try{restored=restoreProject(new URLSearchParams(body).get('project'),catalog);}catch(error){send(400,{error:error.message});return;}
+        const svg=url.pathname.endsWith('/svg');
+        const file=svg?renderSVG(restored.scene,catalog):serializeProject(restored.scene,restored.ui,catalog);
+        res.writeHead(200,{'Content-Type':svg?'image/svg+xml; charset=utf-8':'application/json; charset=utf-8','Content-Disposition':`attachment; filename="${svg?'composition.svg':'composition.sbor.json'}"`,'Cache-Control':'no-store','X-Content-Type-Options':'nosniff'});res.end(file);return;
+      }
       if(req.method==='POST'&&url.pathname==='/api/select'){
         let body='';
         for await(const chunk of req){body+=chunk;if(Buffer.byteLength(body)>8192){send(413,{error:'Запрос слишком большой.'});return;}}

@@ -4,13 +4,22 @@
     "query": "Учиться и сохранять фокус",
     "ids": [
       "headphones",
-      "lamp",
       "book"
     ],
     "roles": [
       "main",
-      "main",
-      "background"
+      "main"
+    ],
+    "heroId": "headphones",
+    "reasons": [
+      {
+        "id": "headphones",
+        "reason": "аудио или сосредоточенность"
+      },
+      {
+        "id": "book",
+        "reason": "знания, обучение и чтение"
+      }
     ],
     "theme": "focus",
     "themeName": "Внимание и продуктивность",
@@ -19,13 +28,22 @@
       {
         "ids": [
           "headphones",
-          "lamp",
           "book"
         ],
         "roles": [
           "main",
-          "main",
-          "background"
+          "main"
+        ],
+        "heroId": "headphones",
+        "reasons": [
+          {
+            "id": "headphones",
+            "reason": "аудио или сосредоточенность"
+          },
+          {
+            "id": "book",
+            "reason": "знания, обучение и чтение"
+          }
         ],
         "theme": "focus",
         "themeName": "Внимание и продуктивность",
@@ -34,13 +52,22 @@
       {
         "ids": [
           "book",
-          "lamp",
-          "headphones"
+          "lamp"
         ],
         "roles": [
           "main",
-          "main",
           "background"
+        ],
+        "heroId": "book",
+        "reasons": [
+          {
+            "id": "book",
+            "reason": "знания, обучение и чтение"
+          },
+          {
+            "id": "lamp",
+            "reason": "вечерняя работа или новая идея"
+          }
         ],
         "theme": "learning",
         "themeName": "Обучение и концентрация",
@@ -49,13 +76,22 @@
       {
         "ids": [
           "lamp",
-          "pen",
-          "puzzle"
+          "book"
         ],
         "roles": [
           "main",
-          "main",
-          "background"
+          "main"
+        ],
+        "heroId": "lamp",
+        "reasons": [
+          {
+            "id": "lamp",
+            "reason": "вечерняя работа или новая идея"
+          },
+          {
+            "id": "book",
+            "reason": "знания, обучение и чтение"
+          }
         ],
         "theme": "ideas",
         "themeName": "Идеи и творчество",
@@ -63,9 +99,10 @@
       }
     ],
     "needsReview": false,
+    "strategy": "semantic-object-retrieval",
     "engine": "sentence-transformer",
     "model": "Xenova/paraphrase-multilingual-MiniLM-L12-v2",
-    "explanation": "Внимание и продуктивность. Объекты подобраны локальной языковой моделью."
+    "explanation": "Внимание и продуктивность. Предметы подобраны по смысловым описаниям библиотеки."
   },
   {
     "file": "02-savings.svg",
@@ -73,12 +110,27 @@
     "ids": [
       "wallet",
       "coin",
-      "folder"
+      "pen"
     ],
     "roles": [
       "main",
       "main",
       "background"
+    ],
+    "heroId": "wallet",
+    "reasons": [
+      {
+        "id": "wallet",
+        "reason": "расходы, покупки и личный бюджет"
+      },
+      {
+        "id": "coin",
+        "reason": "деньги и накопления"
+      },
+      {
+        "id": "pen",
+        "reason": "запись информации и планирование"
+      }
     ],
     "theme": "savings",
     "themeName": "Сбережения и финансовая цель",
@@ -88,12 +140,27 @@
         "ids": [
           "wallet",
           "coin",
-          "folder"
+          "pen"
         ],
         "roles": [
           "main",
           "main",
           "background"
+        ],
+        "heroId": "wallet",
+        "reasons": [
+          {
+            "id": "wallet",
+            "reason": "расходы, покупки и личный бюджет"
+          },
+          {
+            "id": "coin",
+            "reason": "деньги и накопления"
+          },
+          {
+            "id": "pen",
+            "reason": "запись информации и планирование"
+          }
         ],
         "theme": "savings",
         "themeName": "Сбережения и финансовая цель",
@@ -102,13 +169,22 @@
       {
         "ids": [
           "lamp",
-          "pen",
-          "puzzle"
+          "pen"
         ],
         "roles": [
           "main",
-          "main",
           "background"
+        ],
+        "heroId": "lamp",
+        "reasons": [
+          {
+            "id": "lamp",
+            "reason": "вечерняя работа или новая идея"
+          },
+          {
+            "id": "pen",
+            "reason": "запись информации и планирование"
+          }
         ],
         "theme": "ideas",
         "themeName": "Идеи и творчество",
@@ -116,14 +192,23 @@
       },
       {
         "ids": [
-          "folder",
           "pen",
           "lamp"
         ],
         "roles": [
           "main",
-          "main",
-          "background"
+          "main"
+        ],
+        "heroId": "pen",
+        "reasons": [
+          {
+            "id": "pen",
+            "reason": "запись информации и планирование"
+          },
+          {
+            "id": "lamp",
+            "reason": "вечерняя работа или новая идея"
+          }
         ],
         "theme": "planning",
         "themeName": "Планы и цели",
@@ -131,9 +216,10 @@
       }
     ],
     "needsReview": false,
+    "strategy": "semantic-object-retrieval",
     "engine": "sentence-transformer",
     "model": "Xenova/paraphrase-multilingual-MiniLM-L12-v2",
-    "explanation": "Сбережения и финансовая цель. Объекты подобраны локальной языковой моделью."
+    "explanation": "Сбережения и финансовая цель. Предметы подобраны по смысловым описаниям библиотеки."
   },
   {
     "file": "03-teamwork.svg",
@@ -147,6 +233,21 @@
       "main",
       "main",
       "background"
+    ],
+    "heroId": "phone",
+    "reasons": [
+      {
+        "id": "phone",
+        "reason": "цифровой инструмент и связь"
+      },
+      {
+        "id": "puzzle",
+        "reason": "сотрудничество и соединение частей"
+      },
+      {
+        "id": "pen",
+        "reason": "запись информации и планирование"
+      }
     ],
     "theme": "communication",
     "themeName": "Общение и взаимопонимание",
@@ -163,14 +264,30 @@
           "main",
           "background"
         ],
+        "heroId": "phone",
+        "reasons": [
+          {
+            "id": "phone",
+            "reason": "цифровой инструмент и связь"
+          },
+          {
+            "id": "puzzle",
+            "reason": "сотрудничество и соединение частей"
+          },
+          {
+            "id": "pen",
+            "reason": "запись информации и планирование"
+          }
+        ],
         "theme": "communication",
         "themeName": "Общение и взаимопонимание",
         "confidence": 0.684
       }
     ],
     "needsReview": false,
+    "strategy": "semantic-object-retrieval",
     "engine": "sentence-transformer",
     "model": "Xenova/paraphrase-multilingual-MiniLM-L12-v2",
-    "explanation": "Общение и взаимопонимание. Объекты подобраны локальной языковой моделью."
+    "explanation": "Общение и взаимопонимание. Предметы подобраны по смысловым описаниям библиотеки."
   }
 ]

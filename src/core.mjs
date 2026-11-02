@@ -51,7 +51,8 @@ export function createScene(options, catalog) {
   if(ids.length>MAX_ITEMS) throw Error(`В одной композиции допускается до ${MAX_ITEMS} экземпляров.`);
   const palette=validatePalette(options.palette||catalog.palettes[0]);
   const backgroundStyle=options.backgroundStyle??Math.max(0,catalog.palettes.findIndex(p=>p.id===palette.id));
-  const scene={width,height,detail,layout,variant,palette,background,backgroundStyle,items:[]};
+  const heroId=ids.includes(options.heroId)?options.heroId:null;
+  const scene={width,height,detail,layout,variant,palette,background,backgroundStyle,heroId,items:[]};
   const ordered=ids.map((id,i)=>({id,role:options.roles?.[i]||'main'}));
   if(variant%2 && ordered.length>1) ordered.push(ordered.shift());
   scene.items=ordered.map(({id,role})=>({uid:`object-${++sequence}`,assetId:id,role,x:0,y:0,scale:1,rotation:0}));
@@ -68,14 +69,14 @@ export function arrangeScene(scene,catalog) {
   const assets=scene.items.map(item=>getAsset(item,scene,catalog));
   if(scene.items.length>=2&&scene.items.length<=5){
     const main=scene.items.map((item,i)=>({item,i,asset:assets[i]})).filter(x=>x.item.role==='main').sort((a,b)=>b.asset.width*b.asset.height-a.asset.width*a.asset.height);
-    const hero=main[0]||scene.items.map((item,i)=>({item,i,asset:assets[i]})).sort((a,b)=>b.asset.width*b.asset.height-a.asset.width*a.asset.height)[0];
+    const hero=main.find(x=>x.item.assetId===scene.heroId)||main[0]||scene.items.map((item,i)=>({item,i,asset:assets[i]})).sort((a,b)=>b.asset.width*b.asset.height-a.asset.width*a.asset.height)[0];
     const maxW=Math.max(...assets.map(a=>a.width)),maxH=Math.max(...assets.map(a=>a.height));
     const positions=assets.map(()=>({x:0,y:0}));
     const variant=((scene.variant||0)%3+3)%3,tall=area.h>area.w*1.1;
     const backgrounds=scene.items.map((item,i)=>({item,i})).filter(x=>x.item.role==='background'&&x.i!==hero.i);
     positions[hero.i]=[{x:maxW*.16,y:maxH*.30},{x:maxW*.52,y:maxH*.18},{x:0,y:0}][variant];
     backgrounds.forEach(({i},k)=>{positions[i]=[{x:k*maxW*.22,y:k*maxH*.16},{x:maxW*.10+k*maxW*.25,y:k*maxH*.20},{x:maxW*.33+k*maxW*.20,y:maxH*.16+k*maxH*.24}][variant];});
-    const others=main.length?main.slice(1):assets.map((asset,i)=>({asset,i})).filter(x=>x.i!==hero.i);
+    const others=main.length?main.filter(x=>x.i!==hero.i):assets.map((asset,i)=>({asset,i})).filter(x=>x.i!==hero.i);
     others.forEach((other,k)=>{
       const h=positions[hero.i];
       positions[other.i]=variant===0
@@ -84,11 +85,16 @@ export function arrangeScene(scene,catalog) {
           ?tall?{x:maxW*(k%2?.72:0),y:h.y+hero.asset.height*(.76+Math.floor(k/2)*.60)}:{x:maxW*(k%2?.74:0),y:maxH*(.05+Math.floor(k/2)*.74)}
           :{x:h.x+hero.asset.width*(.78+(k%2)*.56),y:h.y+hero.asset.height*(.68+Math.floor(k/2)*.65)};
       if(scene.layout==='diagonal')positions[other.i].y+=maxH*(.20+k*.12);
+      const pair=`${scene.items[hero.i].assetId}:${scene.items[other.i].assetId}`;
+      if(pair==='phone:puzzle')positions[other.i]={x:h.x+(variant===1?-other.asset.width*.40:hero.asset.width*(variant===0?.62:.70)),y:h.y+hero.asset.height*[.78,.70,.65][variant]};
+      if(pair==='wallet:coin')positions[other.i]={x:h.x+[hero.asset.width*.72,-other.asset.width*.12,hero.asset.width*.40][variant],y:h.y-other.asset.height*[.58,.90,1.05][variant]};
+      if(pair==='book:lamp')positions[other.i]={x:h.x+(variant===1?-other.asset.width*.70:hero.asset.width*(variant===0?.75:.80)),y:h.y+(variant===2?hero.asset.height*.12:-other.asset.height*(variant===0?.18:.12))};
     });
-    const w=Math.max(...assets.map((a,i)=>positions[i].x+a.width));
-    const h=Math.max(...assets.map((a,i)=>positions[i].y+a.height));
+    const minX=Math.min(...positions.map(p=>p.x)),minY=Math.min(...positions.map(p=>p.y));
+    const w=Math.max(...assets.map((a,i)=>positions[i].x+a.width))-minX;
+    const h=Math.max(...assets.map((a,i)=>positions[i].y+a.height))-minY;
     const scale=Math.min(area.w/w,area.h/h),offsetX=area.x+(area.w-w*scale)/2,offsetY=area.y+(area.h-h*scale)/2;
-    scene.items.forEach((item,i)=>{item.x=n(offsetX+positions[i].x*scale);item.y=n(offsetY+positions[i].y*scale);item.scale=scale;item.rotation=0;});
+    scene.items.forEach((item,i)=>{item.x=n(offsetX+(positions[i].x-minX)*scale);item.y=n(offsetY+(positions[i].y-minY)*scale);item.scale=scale;item.rotation=0;});
     return scene;
   }
   const variant=((scene.variant||0)%3+3)%3;

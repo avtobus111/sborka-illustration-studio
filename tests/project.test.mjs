@@ -6,6 +6,14 @@ const catalog=JSON.parse(fs.readFileSync(new URL('../assets/catalog.json',import
 const project=await import('../src/project.mjs').catch(()=>null);
 const make=()=>createScene({ids:['phone','puzzle','pen'],roles:['main','main','background'],width:1080,height:1440,variant:2},catalog);
 
+test('смысловой центр проекта сохраняется при открытии',()=>{
+ const scene=createScene({ids:['book','lamp'],heroId:'book'},catalog);
+ const restored=project.restoreProject(project.serializeProject(scene,{},catalog),catalog);
+ assert.equal(restored.scene.heroId,'book');
+ const data=JSON.parse(project.serializeProject(scene,{},catalog));data.scene.heroId='unknown';
+ assert.throws(()=>project.restoreProject(JSON.stringify(data),catalog));
+});
+
 test('проект сохраняет ручную композицию и восстанавливает редактируемые предметы',()=>{
   assert.equal(typeof project?.serializeProject,'function');
   const scene=make();scene.title='Найти общий язык';scene.items[1].x=123.5;scene.items[1].rotation=-25;

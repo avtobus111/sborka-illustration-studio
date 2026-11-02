@@ -1,0 +1,64 @@
+{
+  "version": 1,
+  "library": "4MCFttsSoP7hgQh29zq5G3",
+  "scene": {
+    "width": 1080,
+    "height": 1080,
+    "detail": "L",
+    "layout": "balanced",
+    "variant": 0,
+    "background": true,
+    "backgroundStyle": 1,
+    "heroId": "wallet",
+    "palette": {
+      "id": "peach",
+      "name": "Персик",
+      "background": [
+        "#FDD7B9",
+        "#FAC896",
+        "#D27532"
+      ],
+      "objects": [
+        "#F9ECB0",
+        "#80DADA",
+        "#BEEBEB",
+        "#181817",
+        "#FFFFFF"
+      ]
+    },
+    "title": "Проверка открытия проекта",
+    "items": [
+      {
+        "uid": "restored-1",
+        "assetId": "folder",
+        "role": "background",
+        "x": 70.2,
+        "y": 289.886,
+        "scale": 0.7549307547535644,
+        "rotation": 0
+      },
+      {
+        "uid": "restored-2",
+        "assetId": "wallet",
+        "role": "main",
+        "x": 220.536,
+        "y": 439.9544,
+        "scale": 0.7549307547535644,
+        "rotation": 0
+      },
+      {
+        "uid": "restored-3",
+        "assetId": "coin",
+        "role": "main",
+        "x": 565.37461,
+        "y": 355.66561,
+        "scale": 0.7549307547535644,
+        "rotation": 25
+      }
+    ]
+  },
+  "ui": {
+    "mode": "meaning",
+    "prompt": "Копить на мечту"
+  }
+}

@@ -22,7 +22,7 @@ const demos=[
  {file:'03-teamwork.svg',title:'Найти общий язык',width:1080,height:1440,palette:catalog.palettes[2],detail:'S'}
 ];
 const results=[];
-for(const demo of demos){const selected=await selector.select(demo.title);const s=createScene({...demo,ids:selected.ids,roles:selected.roles},catalog);s.title=demo.title;fs.writeFileSync(path.join(root,'examples',demo.file),renderSVG(s,catalog));results.push({file:demo.file,query:demo.title,...selected});}
+for(const demo of demos){const selected=await selector.select(demo.title);const s=createScene({...demo,ids:selected.ids,roles:selected.roles,heroId:selected.heroId},catalog);s.title=demo.title;fs.writeFileSync(path.join(root,'examples',demo.file),renderSVG(s,catalog));results.push({file:demo.file,query:demo.title,...selected});}
 fs.writeFileSync(path.join(root,'examples/selections.json'),JSON.stringify(results,null,2));
 fs.writeFileSync(path.join(root,'examples/palette-example.json'),JSON.stringify({name:'Моя палитра',background:catalog.palettes[0].background,objects:catalog.palettes[0].objects},null,2));
 console.log(`Built: dist/index.html (${Math.round(Buffer.byteLength(html)/1024)} KB), figma-plugin, 3 model-selected SVG examples.`);

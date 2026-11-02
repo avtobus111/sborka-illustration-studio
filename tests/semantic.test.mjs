@@ -5,6 +5,33 @@ import {createSemanticSelector} from '../src/semantic.mjs';
 const catalog=JSON.parse(fs.readFileSync(new URL('../assets/catalog.json',import.meta.url)));
 const selector=await createSemanticSelector(catalog);
 
+test('простая финансовая метафора не заполняется отвлекающими предметами',async()=>{
+ const r=await selector.select('Копить на мечту');
+ assert.ok(r.ids.includes('wallet')&&r.ids.includes('coin'));
+ assert.ok(!r.ids.includes('lamp'),JSON.stringify(r.ids));
+ assert.ok(r.ids.length<=3);
+});
+
+test('явная конструкция не про X а про Y исключает отрицательный финансовый смысл',async()=>{
+ const r=await selector.select('Не про деньги, а про музыку в дороге');
+ assert.ok(r.ids.includes('headphones'));
+ assert.ok(!r.ids.includes('wallet')&&!r.ids.includes('coin'),JSON.stringify(r.ids));
+});
+
+for(const c of [
+ {q:'Сотрудничаем над учебным проектом',ids:['book','puzzle']},
+ {q:'Мобильный банк помогает копить',ids:['phone','wallet','coin']},
+ {q:'Записываю лекции с электронного курса',ids:['book','pen']},
+ {q:'Планирую покупки заранее',ids:['wallet','pen']}
+])test(`комбинированный смысл: ${c.q}`,async()=>{
+ const r=await selector.select(c.q);
+ assert.ok(c.ids.every(id=>r.ids.includes(id)),JSON.stringify(r));
+ assert.equal(r.strategy,'semantic-object-retrieval');
+ assert.ok(r.ids.includes(r.heroId));
+ assert.equal(r.reasons.length,r.ids.length);
+ assert.ok(r.reasons.every(x=>r.ids.includes(x.id)&&typeof x.reason==='string'));
+});
+
 test('смысловой подбор предлагает до трёх реальных тем для ручного уточнения',async()=>{
   const r=await selector.select('Найти общий язык');
   assert.ok(r.alternatives?.length>=1&&r.alternatives.length<=3);

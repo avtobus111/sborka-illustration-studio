@@ -99,7 +99,8 @@ function createScene(options, catalog) {
   if(ids.length>MAX_ITEMS) throw Error(`В одной композиции допускается до ${MAX_ITEMS} экземпляров.`);
   const palette=validatePalette(options.palette||catalog.palettes[0]);
   const backgroundStyle=options.backgroundStyle??Math.max(0,catalog.palettes.findIndex(p=>p.id===palette.id));
-  const scene={width,height,detail,layout,variant,palette,background,backgroundStyle,items:[]};
+  const heroId=ids.includes(options.heroId)?options.heroId:null;
+  const scene={width,height,detail,layout,variant,palette,background,backgroundStyle,heroId,items:[]};
   const ordered=ids.map((id,i)=>({id,role:options.roles?.[i]||'main'}));
   if(variant%2 && ordered.length>1) ordered.push(ordered.shift());
   scene.items=ordered.map(({id,role})=>({uid:`object-${++sequence}`,assetId:id,role,x:0,y:0,scale:1,rotation:0}));
@@ -116,14 +117,14 @@ function arrangeScene(scene,catalog) {
   const assets=scene.items.map(item=>getAsset(item,scene,catalog));
   if(scene.items.length>=2&&scene.items.length<=5){
     const main=scene.items.map((item,i)=>({item,i,asset:assets[i]})).filter(x=>x.item.role==='main').sort((a,b)=>b.asset.width*b.asset.height-a.asset.width*a.asset.height);
-    const hero=main[0]||scene.items.map((item,i)=>({item,i,asset:assets[i]})).sort((a,b)=>b.asset.width*b.asset.height-a.asset.width*a.asset.height)[0];
+    const hero=main.find(x=>x.item.assetId===scene.heroId)||main[0]||scene.items.map((item,i)=>({item,i,asset:assets[i]})).sort((a,b)=>b.asset.width*b.asset.height-a.asset.width*a.asset.height)[0];
     const maxW=Math.max(...assets.map(a=>a.width)),maxH=Math.max(...assets.map(a=>a.height));
     const positions=assets.map(()=>({x:0,y:0}));
     const variant=((scene.variant||0)%3+3)%3,tall=area.h>area.w*1.1;
     const backgrounds=scene.items.map((item,i)=>({item,i})).filter(x=>x.item.role==='background'&&x.i!==hero.i);
     positions[hero.i]=[{x:maxW*.16,y:maxH*.30},{x:maxW*.52,y:maxH*.18},{x:0,y:0}][variant];
     backgrounds.forEach(({i},k)=>{positions[i]=[{x:k*maxW*.22,y:k*maxH*.16},{x:maxW*.10+k*maxW*.25,y:k*maxH*.20},{x:maxW*.33+k*maxW*.20,y:maxH*.16+k*maxH*.24}][variant];});
-    const others=main.length?main.slice(1):assets.map((asset,i)=>({asset,i})).filter(x=>x.i!==hero.i);
+    const others=main.length?main.filter(x=>x.i!==hero.i):assets.map((asset,i)=>({asset,i})).filter(x=>x.i!==hero.i);
     others.forEach((other,k)=>{
       const h=positions[hero.i];
       positions[other.i]=variant===0
@@ -132,11 +133,16 @@ function arrangeScene(scene,catalog) {
           ?tall?{x:maxW*(k%2?.72:0),y:h.y+hero.asset.height*(.76+Math.floor(k/2)*.60)}:{x:maxW*(k%2?.74:0),y:maxH*(.05+Math.floor(k/2)*.74)}
           :{x:h.x+hero.asset.width*(.78+(k%2)*.56),y:h.y+hero.asset.height*(.68+Math.floor(k/2)*.65)};
       if(scene.layout==='diagonal')positions[other.i].y+=maxH*(.20+k*.12);
+      const pair=`${scene.items[hero.i].assetId}:${scene.items[other.i].assetId}`;
+      if(pair==='phone:puzzle')positions[other.i]={x:h.x+(variant===1?-other.asset.width*.40:hero.asset.width*(variant===0?.62:.70)),y:h.y+hero.asset.height*[.78,.70,.65][variant]};
+      if(pair==='wallet:coin')positions[other.i]={x:h.x+[hero.asset.width*.72,-other.asset.width*.12,hero.asset.width*.40][variant],y:h.y-other.asset.height*[.58,.90,1.05][variant]};
+      if(pair==='book:lamp')positions[other.i]={x:h.x+(variant===1?-other.asset.width*.70:hero.asset.width*(variant===0?.75:.80)),y:h.y+(variant===2?hero.asset.height*.12:-other.asset.height*(variant===0?.18:.12))};
     });
-    const w=Math.max(...assets.map((a,i)=>positions[i].x+a.width));
-    const h=Math.max(...assets.map((a,i)=>positions[i].y+a.height));
+    const minX=Math.min(...positions.map(p=>p.x)),minY=Math.min(...positions.map(p=>p.y));
+    const w=Math.max(...assets.map((a,i)=>positions[i].x+a.width))-minX;
+    const h=Math.max(...assets.map((a,i)=>positions[i].y+a.height))-minY;
     const scale=Math.min(area.w/w,area.h/h),offsetX=area.x+(area.w-w*scale)/2,offsetY=area.y+(area.h-h*scale)/2;
-    scene.items.forEach((item,i)=>{item.x=n(offsetX+positions[i].x*scale);item.y=n(offsetY+positions[i].y*scale);item.scale=scale;item.rotation=0;});
+    scene.items.forEach((item,i)=>{item.x=n(offsetX+(positions[i].x-minX)*scale);item.y=n(offsetY+(positions[i].y-minY)*scale);item.scale=scale;item.rotation=0;});
     return scene;
   }
   const variant=((scene.variant||0)%3+3)%3;
@@ -243,7 +249,8 @@ function restoreProject(text,catalog){
   const palette=validatePalette(s.palette);
   if(s.backgroundStyle!==undefined&&(!Number.isInteger(s.backgroundStyle)||s.backgroundStyle<0||s.backgroundStyle>2))throw Error('Неизвестный вариант декоративного фона.');
   const backgroundStyle=s.backgroundStyle??Math.max(0,catalog.palettes.findIndex(p=>p.id===palette.id));
-  const scene={width:s.width,height:s.height,detail:s.detail,layout:s.layout,variant:s.variant,background:s.background,backgroundStyle,palette,title:String(s.title||'').slice(0,500),items};
+  if(s.heroId!=null&&(!ids.has(s.heroId)||!items.some(i=>i.assetId===s.heroId)))throw Error('Смысловой центр отсутствует в проекте.');
+  const scene={width:s.width,height:s.height,detail:s.detail,layout:s.layout,variant:s.variant,background:s.background,backgroundStyle,heroId:s.heroId??null,palette,title:String(s.title||'').slice(0,500),items};
   const ui={mode:data.ui?.mode==='components'?'components':'meaning',prompt:typeof data.ui?.prompt==='string'?data.ui.prompt.slice(0,500):scene.title};
   return {scene,ui};
 }
@@ -313,7 +320,7 @@ function draw(){
 }
 function renderPreviews(){
   $('variant').disabled=!scene.items.length;
-  const key=JSON.stringify([scene.width,scene.height,scene.detail,scene.layout,scene.background,scene.backgroundStyle,scene.palette,scene.items.map(i=>[i.assetId,i.role])]);
+  const key=JSON.stringify([scene.width,scene.height,scene.detail,scene.layout,scene.heroId,scene.background,scene.backgroundStyle,scene.palette,scene.items.map(i=>[i.assetId,i.role])]);
   const options=[0,1,2].map(i=>compositionVariant(scene,catalog,i));
   if(key!==previewKey){previewKey=key;$('variant-previews').innerHTML=scene.items.length?options.map((s,i)=>`<button class="variant-preview" data-variant="${i}" aria-label="Вариант композиции ${i+1}">${compositionPreview(s,catalog,`preview-${i}`)}<span>${i+1}</span></button>`).join(''):'<span class="panel-note">Добавьте предметы в композицию.</span>';}
   document.querySelectorAll('[data-variant]').forEach(button=>{const s=options[Number(button.dataset.variant)],active=scene.items.every((item,i)=>Math.abs(item.x-s.items[i].x)<.01&&Math.abs(item.y-s.items[i].y)<.01&&item.rotation===0);button.setAttribute('aria-pressed',String(active));});
@@ -330,8 +337,18 @@ function render(){
 function download(text,name,type='image/svg+xml'){
   const url=URL.createObjectURL(new Blob([text],{type}));const a=document.createElement('a');a.href=url;a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
 }
+function downloadProjectFile(kind){
+  if(isFigma||location.protocol==='file:'){
+    if(kind==='svg')download(renderSVG(scene,catalog),'composition.svg');
+    else download(serializeProject(scene,{mode,prompt:$('prompt').value},catalog),'composition.sbor.json','application/json');
+    return;
+  }
+  let frame=$('export-frame');if(!frame){frame=document.createElement('iframe');frame.id='export-frame';frame.name='studio-export';frame.hidden=true;document.body.append(frame);}
+  const form=document.createElement('form');form.method='POST';form.action=apiBase+`/api/export/${kind}`;form.target=frame.name;form.hidden=true;
+  const field=document.createElement('input');field.name='project';field.value=serializeProject(scene,{mode,prompt:$('prompt').value},catalog);form.append(field);document.body.append(form);form.submit();form.remove();
+}
 function applySelection(result,query){
-  remember();scene=createScene({ids:result.ids,roles:result.roles,width:scene.width,height:scene.height,detail:scene.detail,palette:scene.palette,layout:scene.layout,background:scene.background,backgroundStyle:scene.backgroundStyle,variant:scene.variant},catalog);
+  remember();scene=createScene({ids:result.ids,roles:result.roles,heroId:result.heroId,width:scene.width,height:scene.height,detail:scene.detail,palette:scene.palette,layout:scene.layout,background:scene.background,backgroundStyle:scene.backgroundStyle,variant:scene.variant},catalog);
   scene.title=query.trim().slice(0,160)||'Композиция';scene.semantic=result.engine?{theme:result.theme,themeName:result.themeName,engine:result.engine}:null;chosen=new Set(result.ids);selected=null;changed(`${result.ids.length} объекта · ${result.themeName||result.explanation}`);
 }
 function showMeaningChoices(result,query,version,needsReview){
@@ -341,7 +358,7 @@ function showMeaningChoices(result,query,version,needsReview){
   $('meaning-options').replaceChildren();
   for(const alternative of result.alternatives){
     const button=document.createElement('button');button.className='meaning-choice';button.textContent=alternative.themeName;
-    const objects=document.createElement('span');objects.textContent=alternative.ids.map(id=>catalog.objects.find(o=>o.id===id).name).join(' · ');button.append(objects);
+    const objects=document.createElement('span');objects.textContent=alternative.ids.map(id=>catalog.objects.find(o=>o.id===id).name).join(' · ');button.append(objects);button.title=(alternative.reasons||[]).map(r=>`${catalog.objects.find(o=>o.id===r.id).name}: ${r.reason}`).join('\n');
     button.setAttribute('aria-pressed',String(!needsReview&&alternative.theme===scene.semantic?.theme));
     button.onclick=()=>{if(version!==buildVersion)return;applySelection({...alternative,engine:result.engine},query);showMeaningChoices(result,query,buildVersion,false);};
     $('meaning-options').append(button);
@@ -399,7 +416,7 @@ $('variant-previews').onclick=e=>{const button=e.target.closest('[data-variant]'
 document.querySelectorAll('[data-detail]').forEach(b=>b.onclick=()=>{if(scene.detail===b.dataset.detail)return;remember();scene=setDetail(scene,b.dataset.detail,catalog);changed(`Загружены исходные векторы ${scene.detail}. Раскладка пересчитана.`);});
 $('layout').onchange=()=>{remember();scene.layout=$('layout').value;arrangeScene(scene,catalog);changed('Расположение обновлено.');};
 function resize(width,height){
-  try{const next=createScene({ids:scene.items.map(x=>x.assetId),roles:scene.items.map(x=>x.role),width,height,detail:scene.detail,palette:scene.palette,layout:scene.layout,background:scene.background,backgroundStyle:scene.backgroundStyle,variant:scene.variant,allowEmpty:true},catalog);remember();scene={...next,title:scene.title};selected=null;changed('Композиция адаптирована под новый формат.');}catch(error){status(error.message,true);}
+  try{const next=createScene({ids:scene.items.map(x=>x.assetId),roles:scene.items.map(x=>x.role),heroId:scene.heroId,width,height,detail:scene.detail,palette:scene.palette,layout:scene.layout,background:scene.background,backgroundStyle:scene.backgroundStyle,variant:scene.variant,allowEmpty:true},catalog);remember();scene={...next,title:scene.title};selected=null;changed('Композиция адаптирована под новый формат.');}catch(error){status(error.message,true);}
 }
 $('format').onchange=()=>{const custom=$('format').value==='custom';$('custom-size').hidden=!custom;if(!custom)resize(...$('format').value.split(',').map(Number));};
 $('apply-size').onclick=()=>resize(Number($('width').value),Number($('height').value));
@@ -417,7 +434,7 @@ $('rotation').addEventListener('keydown',e=>{if(['ArrowLeft','ArrowRight','Home'
 $('rotation').oninput=()=>{const item=current();if(!item)return;item.rotation=Number($('rotation').value);$('rotation-value').value=`${item.rotation}°`;draw();};
 $('rotation').onchange=()=>changed();
 $('duplicate').onclick=()=>{const item=current();if(!item)return;if(scene.items.length>=MAX_ITEMS){status(`Максимум ${MAX_ITEMS} экземпляров в одной композиции. Удалите лишние объекты.`,true);return;}remember();const copy={...item,uid:`copy-${Date.now()}-${sequence++}`,x:item.x+20,y:item.y+20};scene.items.push(copy);selected=copy.uid;changed('Объект продублирован.');};
-function removeSelected(){if(!current())return;remember();scene.items=scene.items.filter(x=>x.uid!==selected);selected=null;changed('Объект удалён.');}
+function removeSelected(){if(!current())return;remember();scene.items=scene.items.filter(x=>x.uid!==selected);if(!scene.items.some(i=>i.assetId===scene.heroId))scene.heroId=null;selected=null;changed('Объект удалён.');}
 $('delete').onclick=removeSelected;
 function moveLayer(delta){const index=scene.items.findIndex(x=>x.uid===selected),next=index+delta;if(index<0||next<0||next>=scene.items.length)return;remember();[scene.items[index],scene.items[next]]=[scene.items[next],scene.items[index]];changed('Порядок слоёв изменён.');}
 $('layer-up').onclick=()=>moveLayer(1);$('layer-down').onclick=()=>moveLayer(-1);
@@ -438,8 +455,8 @@ document.addEventListener('keydown',e=>{
   const moves={ArrowLeft:[-1,0],ArrowRight:[1,0],ArrowUp:[0,-1],ArrowDown:[0,1]};
   if(current()&&moves[e.key]){e.preventDefault();remember();const [x,y]=moves[e.key],step=e.shiftKey?10:1;current().x+=x*step;current().y+=y*step;changed();}
 });
-$('export-button').onclick=()=>{download(renderSVG(scene,catalog),'composition.svg');status('SVG подготовлен к скачиванию.');};
-$('save-project').onclick=()=>{try{download(serializeProject(scene,{mode,prompt:$('prompt').value},catalog),'composition.sbor.json','application/json');$('project-menu').open=false;status('Проект подготовлен к скачиванию. Его можно открыть здесь и продолжить работу.');}catch(error){status(error.message,true);}};
+$('export-button').onclick=()=>{try{downloadProjectFile('svg');status('SVG подготовлен к скачиванию.');}catch(error){status(error.message,true);}};
+$('save-project').onclick=()=>{try{downloadProjectFile('project');$('project-menu').open=false;status('Проект подготовлен к скачиванию. Его можно открыть здесь и продолжить работу.');}catch(error){status(error.message,true);}};
 $('open-project').onclick=()=>{$('project-menu').open=false;$('project-file').click();};
 function adoptProject(restored){
   scene=restored.scene;mode=restored.ui.mode;chosen=new Set(projectChosenIds(restored,catalog));selected=null;

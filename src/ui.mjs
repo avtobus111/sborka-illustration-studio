@@ -52,7 +52,7 @@ function draw(){
 }
 function renderPreviews(){
   $('variant').disabled=!scene.items.length;
-  const key=JSON.stringify([scene.width,scene.height,scene.detail,scene.layout,scene.background,scene.backgroundStyle,scene.palette,scene.items.map(i=>[i.assetId,i.role])]);
+  const key=JSON.stringify([scene.width,scene.height,scene.detail,scene.layout,scene.heroId,scene.background,scene.backgroundStyle,scene.palette,scene.items.map(i=>[i.assetId,i.role])]);
   const options=[0,1,2].map(i=>compositionVariant(scene,catalog,i));
   if(key!==previewKey){previewKey=key;$('variant-previews').innerHTML=scene.items.length?options.map((s,i)=>`<button class="variant-preview" data-variant="${i}" aria-label="Вариант композиции ${i+1}">${compositionPreview(s,catalog,`preview-${i}`)}<span>${i+1}</span></button>`).join(''):'<span class="panel-note">Добавьте предметы в композицию.</span>';}
   document.querySelectorAll('[data-variant]').forEach(button=>{const s=options[Number(button.dataset.variant)],active=scene.items.every((item,i)=>Math.abs(item.x-s.items[i].x)<.01&&Math.abs(item.y-s.items[i].y)<.01&&item.rotation===0);button.setAttribute('aria-pressed',String(active));});
@@ -69,8 +69,18 @@ function render(){
 function download(text,name,type='image/svg+xml'){
   const url=URL.createObjectURL(new Blob([text],{type}));const a=document.createElement('a');a.href=url;a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
 }
+function downloadProjectFile(kind){
+  if(isFigma||location.protocol==='file:'){
+    if(kind==='svg')download(renderSVG(scene,catalog),'composition.svg');
+    else download(serializeProject(scene,{mode,prompt:$('prompt').value},catalog),'composition.sbor.json','application/json');
+    return;
+  }
+  let frame=$('export-frame');if(!frame){frame=document.createElement('iframe');frame.id='export-frame';frame.name='studio-export';frame.hidden=true;document.body.append(frame);}
+  const form=document.createElement('form');form.method='POST';form.action=apiBase+`/api/export/${kind}`;form.target=frame.name;form.hidden=true;
+  const field=document.createElement('input');field.name='project';field.value=serializeProject(scene,{mode,prompt:$('prompt').value},catalog);form.append(field);document.body.append(form);form.submit();form.remove();
+}
 function applySelection(result,query){
-  remember();scene=createScene({ids:result.ids,roles:result.roles,width:scene.width,height:scene.height,detail:scene.detail,palette:scene.palette,layout:scene.layout,background:scene.background,backgroundStyle:scene.backgroundStyle,variant:scene.variant},catalog);
+  remember();scene=createScene({ids:result.ids,roles:result.roles,heroId:result.heroId,width:scene.width,height:scene.height,detail:scene.detail,palette:scene.palette,layout:scene.layout,background:scene.background,backgroundStyle:scene.backgroundStyle,variant:scene.variant},catalog);
   scene.title=query.trim().slice(0,160)||'Композиция';scene.semantic=result.engine?{theme:result.theme,themeName:result.themeName,engine:result.engine}:null;chosen=new Set(result.ids);selected=null;changed(`${result.ids.length} объекта · ${result.themeName||result.explanation}`);
 }
 function showMeaningChoices(result,query,version,needsReview){
@@ -80,7 +90,7 @@ function showMeaningChoices(result,query,version,needsReview){
   $('meaning-options').replaceChildren();
   for(const alternative of result.alternatives){
     const button=document.createElement('button');button.className='meaning-choice';button.textContent=alternative.themeName;
-    const objects=document.createElement('span');objects.textContent=alternative.ids.map(id=>catalog.objects.find(o=>o.id===id).name).join(' · ');button.append(objects);
+    const objects=document.createElement('span');objects.textContent=alternative.ids.map(id=>catalog.objects.find(o=>o.id===id).name).join(' · ');button.append(objects);button.title=(alternative.reasons||[]).map(r=>`${catalog.objects.find(o=>o.id===r.id).name}: ${r.reason}`).join('\n');
     button.setAttribute('aria-pressed',String(!needsReview&&alternative.theme===scene.semantic?.theme));
     button.onclick=()=>{if(version!==buildVersion)return;applySelection({...alternative,engine:result.engine},query);showMeaningChoices(result,query,buildVersion,false);};
     $('meaning-options').append(button);
@@ -138,7 +148,7 @@ $('variant-previews').onclick=e=>{const button=e.target.closest('[data-variant]'
 document.querySelectorAll('[data-detail]').forEach(b=>b.onclick=()=>{if(scene.detail===b.dataset.detail)return;remember();scene=setDetail(scene,b.dataset.detail,catalog);changed(`Загружены исходные векторы ${scene.detail}. Раскладка пересчитана.`);});
 $('layout').onchange=()=>{remember();scene.layout=$('layout').value;arrangeScene(scene,catalog);changed('Расположение обновлено.');};
 function resize(width,height){
-  try{const next=createScene({ids:scene.items.map(x=>x.assetId),roles:scene.items.map(x=>x.role),width,height,detail:scene.detail,palette:scene.palette,layout:scene.layout,background:scene.background,backgroundStyle:scene.backgroundStyle,variant:scene.variant,allowEmpty:true},catalog);remember();scene={...next,title:scene.title};selected=null;changed('Композиция адаптирована под новый формат.');}catch(error){status(error.message,true);}
+  try{const next=createScene({ids:scene.items.map(x=>x.assetId),roles:scene.items.map(x=>x.role),heroId:scene.heroId,width,height,detail:scene.detail,palette:scene.palette,layout:scene.layout,background:scene.background,backgroundStyle:scene.backgroundStyle,variant:scene.variant,allowEmpty:true},catalog);remember();scene={...next,title:scene.title};selected=null;changed('Композиция адаптирована под новый формат.');}catch(error){status(error.message,true);}
 }
 $('format').onchange=()=>{const custom=$('format').value==='custom';$('custom-size').hidden=!custom;if(!custom)resize(...$('format').value.split(',').map(Number));};
 $('apply-size').onclick=()=>resize(Number($('width').value),Number($('height').value));
@@ -156,7 +166,7 @@ $('rotation').addEventListener('keydown',e=>{if(['ArrowLeft','ArrowRight','Home'
 $('rotation').oninput=()=>{const item=current();if(!item)return;item.rotation=Number($('rotation').value);$('rotation-value').value=`${item.rotation}°`;draw();};
 $('rotation').onchange=()=>changed();
 $('duplicate').onclick=()=>{const item=current();if(!item)return;if(scene.items.length>=MAX_ITEMS){status(`Максимум ${MAX_ITEMS} экземпляров в одной композиции. Удалите лишние объекты.`,true);return;}remember();const copy={...item,uid:`copy-${Date.now()}-${sequence++}`,x:item.x+20,y:item.y+20};scene.items.push(copy);selected=copy.uid;changed('Объект продублирован.');};
-function removeSelected(){if(!current())return;remember();scene.items=scene.items.filter(x=>x.uid!==selected);selected=null;changed('Объект удалён.');}
+function removeSelected(){if(!current())return;remember();scene.items=scene.items.filter(x=>x.uid!==selected);if(!scene.items.some(i=>i.assetId===scene.heroId))scene.heroId=null;selected=null;changed('Объект удалён.');}
 $('delete').onclick=removeSelected;
 function moveLayer(delta){const index=scene.items.findIndex(x=>x.uid===selected),next=index+delta;if(index<0||next<0||next>=scene.items.length)return;remember();[scene.items[index],scene.items[next]]=[scene.items[next],scene.items[index]];changed('Порядок слоёв изменён.');}
 $('layer-up').onclick=()=>moveLayer(1);$('layer-down').onclick=()=>moveLayer(-1);
@@ -177,8 +187,8 @@ document.addEventListener('keydown',e=>{
   const moves={ArrowLeft:[-1,0],ArrowRight:[1,0],ArrowUp:[0,-1],ArrowDown:[0,1]};
   if(current()&&moves[e.key]){e.preventDefault();remember();const [x,y]=moves[e.key],step=e.shiftKey?10:1;current().x+=x*step;current().y+=y*step;changed();}
 });
-$('export-button').onclick=()=>{download(renderSVG(scene,catalog),'composition.svg');status('SVG подготовлен к скачиванию.');};
-$('save-project').onclick=()=>{try{download(serializeProject(scene,{mode,prompt:$('prompt').value},catalog),'composition.sbor.json','application/json');$('project-menu').open=false;status('Проект подготовлен к скачиванию. Его можно открыть здесь и продолжить работу.');}catch(error){status(error.message,true);}};
+$('export-button').onclick=()=>{try{downloadProjectFile('svg');status('SVG подготовлен к скачиванию.');}catch(error){status(error.message,true);}};
+$('save-project').onclick=()=>{try{downloadProjectFile('project');$('project-menu').open=false;status('Проект подготовлен к скачиванию. Его можно открыть здесь и продолжить работу.');}catch(error){status(error.message,true);}};
 $('open-project').onclick=()=>{$('project-menu').open=false;$('project-file').click();};
 function adoptProject(restored){
   scene=restored.scene;mode=restored.ui.mode;chosen=new Set(projectChosenIds(restored,catalog));selected=null;

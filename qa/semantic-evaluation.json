@@ -1,0 +1,1076 @@
+{
+  "date": "2026-11-03",
+  "not_statistical_accuracy": true,
+  "diagnostic": {
+    "before_passed": 7,
+    "after_passed": 13,
+    "total": 16,
+    "used_for_development": true,
+    "criteria": "manually specified required object IDs",
+    "before": [
+      {
+        "query": "Осваиваем новый язык вместе с друзьями",
+        "required": [
+          "book",
+          "puzzle"
+        ],
+        "ids": [],
+        "review": false,
+        "ok": false
+      },
+      {
+        "query": "Веду бюджет и планирую расходы",
+        "required": [
+          "wallet",
+          "coin"
+        ],
+        "ids": [
+          "wallet",
+          "coin",
+          "pen"
+        ],
+        "theme": "budget",
+        "review": false,
+        "score": 0.748,
+        "ok": true
+      },
+      {
+        "query": "Записываю лекции с электронного курса",
+        "required": [
+          "book",
+          "pen",
+          "phone"
+        ],
+        "ids": [
+          "book",
+          "lamp",
+          "headphones"
+        ],
+        "theme": "learning",
+        "review": false,
+        "score": 0.55,
+        "ok": false
+      },
+      {
+        "query": "Хочу поздравить коллег с завершением проекта",
+        "required": [
+          "flowers"
+        ],
+        "ids": [
+          "puzzle",
+          "phone",
+          "pen"
+        ],
+        "theme": "teamwork",
+        "review": false,
+        "score": 0.464,
+        "ok": false
+      },
+      {
+        "query": "Слушаю подкасты по дороге на учёбу",
+        "required": [
+          "headphones",
+          "book"
+        ],
+        "ids": [
+          "headphones",
+          "phone",
+          "flowers"
+        ],
+        "theme": "music",
+        "review": false,
+        "score": 0.472,
+        "ok": false
+      },
+      {
+        "query": "Обсуждаем сложную задачу по видеосвязи",
+        "required": [
+          "phone",
+          "puzzle"
+        ],
+        "ids": [],
+        "review": false,
+        "ok": false
+      },
+      {
+        "query": "Сохраняю чеки и веду учёт покупок",
+        "required": [
+          "folder",
+          "wallet"
+        ],
+        "ids": [
+          "wallet",
+          "coin",
+          "pen"
+        ],
+        "theme": "budget",
+        "review": false,
+        "score": 0.668,
+        "ok": false
+      },
+      {
+        "query": "Творческий блок: собрать разрозненные идеи",
+        "required": [
+          "puzzle",
+          "lamp"
+        ],
+        "ids": [
+          "lamp",
+          "pen",
+          "puzzle"
+        ],
+        "theme": "ideas",
+        "review": false,
+        "score": 0.719,
+        "ok": true
+      },
+      {
+        "query": "Поменьше экрана и побольше чтения",
+        "required": [
+          "book"
+        ],
+        "ids": [
+          "book",
+          "lamp",
+          "headphones"
+        ],
+        "theme": "learning",
+        "review": false,
+        "score": 0.582,
+        "ok": true
+      },
+      {
+        "query": "Подготовить письменное поздравление",
+        "required": [
+          "pen",
+          "flowers"
+        ],
+        "ids": [
+          "flowers",
+          "phone",
+          "pen"
+        ],
+        "theme": "care",
+        "review": false,
+        "score": 0.637,
+        "ok": true
+      },
+      {
+        "query": "Как объединить учёбу и вечернюю работу",
+        "required": [
+          "book",
+          "lamp"
+        ],
+        "ids": [
+          "headphones",
+          "lamp",
+          "book"
+        ],
+        "theme": "focus",
+        "review": true,
+        "score": 0.566,
+        "ok": true
+      },
+      {
+        "query": "Сотрудничаем над учебным проектом",
+        "required": [
+          "book",
+          "puzzle"
+        ],
+        "ids": [
+          "puzzle",
+          "phone",
+          "pen"
+        ],
+        "theme": "teamwork",
+        "review": false,
+        "score": 0.615,
+        "ok": false
+      },
+      {
+        "query": "Мобильный банк помогает копить",
+        "required": [
+          "phone",
+          "wallet",
+          "coin"
+        ],
+        "ids": [
+          "phone",
+          "puzzle",
+          "folder"
+        ],
+        "theme": "digital",
+        "review": false,
+        "score": 0.495,
+        "ok": false
+      },
+      {
+        "query": "Планирую покупки заранее",
+        "required": [
+          "wallet",
+          "pen"
+        ],
+        "ids": [
+          "wallet",
+          "coin",
+          "folder"
+        ],
+        "theme": "savings",
+        "review": false,
+        "score": 0.576,
+        "ok": false
+      },
+      {
+        "query": "Не про деньги, а про музыку",
+        "required": [
+          "headphones"
+        ],
+        "ids": [
+          "headphones",
+          "phone",
+          "flowers"
+        ],
+        "theme": "music",
+        "review": false,
+        "score": 0.606,
+        "ok": true
+      },
+      {
+        "query": "Рецепт шоколадного кекса",
+        "required": [],
+        "ids": [],
+        "review": false,
+        "ok": true
+      }
+    ],
+    "after": [
+      {
+        "query": "Осваиваем новый язык вместе с друзьями",
+        "required": [
+          "book",
+          "puzzle"
+        ],
+        "ids": [
+          "phone",
+          "puzzle"
+        ],
+        "theme": "communication",
+        "review": true,
+        "score": 0.431,
+        "ok": false
+      },
+      {
+        "query": "Веду бюджет и планирую расходы",
+        "required": [
+          "wallet",
+          "coin"
+        ],
+        "ids": [
+          "wallet",
+          "coin"
+        ],
+        "theme": "budget",
+        "review": false,
+        "score": 0.748,
+        "ok": true
+      },
+      {
+        "query": "Записываю лекции с электронного курса",
+        "required": [
+          "book",
+          "pen",
+          "phone"
+        ],
+        "ids": [
+          "book",
+          "pen"
+        ],
+        "theme": "learning",
+        "review": false,
+        "score": 0.55,
+        "ok": false
+      },
+      {
+        "query": "Хочу поздравить коллег с завершением проекта",
+        "required": [
+          "flowers"
+        ],
+        "ids": [
+          "puzzle",
+          "pen"
+        ],
+        "theme": "teamwork",
+        "review": false,
+        "score": 0.464,
+        "ok": false
+      },
+      {
+        "query": "Слушаю подкасты по дороге на учёбу",
+        "required": [
+          "headphones",
+          "book"
+        ],
+        "ids": [
+          "headphones",
+          "book"
+        ],
+        "theme": "music",
+        "review": false,
+        "score": 0.472,
+        "ok": true
+      },
+      {
+        "query": "Обсуждаем сложную задачу по видеосвязи",
+        "required": [
+          "phone",
+          "puzzle"
+        ],
+        "ids": [
+          "phone",
+          "puzzle"
+        ],
+        "theme": "digital",
+        "review": true,
+        "score": 0.378,
+        "ok": true
+      },
+      {
+        "query": "Сохраняю чеки и веду учёт покупок",
+        "required": [
+          "folder",
+          "wallet"
+        ],
+        "ids": [
+          "wallet",
+          "coin",
+          "folder"
+        ],
+        "theme": "budget",
+        "review": false,
+        "score": 0.668,
+        "ok": true
+      },
+      {
+        "query": "Творческий блок: собрать разрозненные идеи",
+        "required": [
+          "puzzle",
+          "lamp"
+        ],
+        "ids": [
+          "lamp",
+          "puzzle"
+        ],
+        "theme": "ideas",
+        "review": false,
+        "score": 0.719,
+        "ok": true
+      },
+      {
+        "query": "Поменьше экрана и побольше чтения",
+        "required": [
+          "book"
+        ],
+        "ids": [
+          "book",
+          "pen"
+        ],
+        "theme": "learning",
+        "review": false,
+        "score": 0.582,
+        "ok": true
+      },
+      {
+        "query": "Подготовить письменное поздравление",
+        "required": [
+          "pen",
+          "flowers"
+        ],
+        "ids": [
+          "flowers",
+          "pen"
+        ],
+        "theme": "care",
+        "review": false,
+        "score": 0.637,
+        "ok": true
+      },
+      {
+        "query": "Как объединить учёбу и вечернюю работу",
+        "required": [
+          "book",
+          "lamp"
+        ],
+        "ids": [
+          "headphones",
+          "lamp",
+          "puzzle",
+          "book"
+        ],
+        "theme": "focus",
+        "review": true,
+        "score": 0.566,
+        "ok": true
+      },
+      {
+        "query": "Сотрудничаем над учебным проектом",
+        "required": [
+          "book",
+          "puzzle"
+        ],
+        "ids": [
+          "puzzle",
+          "book"
+        ],
+        "theme": "teamwork",
+        "review": false,
+        "score": 0.615,
+        "ok": true
+      },
+      {
+        "query": "Мобильный банк помогает копить",
+        "required": [
+          "phone",
+          "wallet",
+          "coin"
+        ],
+        "ids": [
+          "phone",
+          "wallet",
+          "coin"
+        ],
+        "theme": "digital",
+        "review": false,
+        "score": 0.495,
+        "ok": true
+      },
+      {
+        "query": "Планирую покупки заранее",
+        "required": [
+          "wallet",
+          "pen"
+        ],
+        "ids": [
+          "wallet",
+          "coin",
+          "pen"
+        ],
+        "theme": "savings",
+        "review": false,
+        "score": 0.576,
+        "ok": true
+      },
+      {
+        "query": "Не про деньги, а про музыку",
+        "required": [
+          "headphones"
+        ],
+        "ids": [
+          "headphones"
+        ],
+        "theme": "music",
+        "review": false,
+        "score": 0.712,
+        "ok": true
+      },
+      {
+        "query": "Рецепт шоколадного кекса",
+        "required": [],
+        "ids": [],
+        "review": false,
+        "ok": true
+      }
+    ]
+  },
+  "review": {
+    "initial_independent_passed": 5,
+    "initial_total": 8,
+    "final_regression_passed": 5,
+    "now_used_for_regression": true,
+    "results": [
+      {
+        "query": "Собрать мысли для новой главы романа",
+        "pass": false,
+        "schema": true,
+        "ids": [
+          "lamp",
+          "book"
+        ],
+        "roles": [
+          "main",
+          "main"
+        ],
+        "heroId": "lamp",
+        "reasons": [
+          {
+            "id": "lamp",
+            "reason": "вечерняя работа или новая идея"
+          },
+          {
+            "id": "book",
+            "reason": "знания, обучение и чтение"
+          }
+        ],
+        "theme": "ideas",
+        "themeName": "Идеи и творчество",
+        "confidence": 0.435,
+        "alternatives": [
+          {
+            "ids": [
+              "lamp",
+              "book"
+            ],
+            "roles": [
+              "main",
+              "main"
+            ],
+            "heroId": "lamp",
+            "reasons": [
+              {
+                "id": "lamp",
+                "reason": "вечерняя работа или новая идея"
+              },
+              {
+                "id": "book",
+                "reason": "знания, обучение и чтение"
+              }
+            ],
+            "theme": "ideas",
+            "themeName": "Идеи и творчество",
+            "confidence": 0.435
+          },
+          {
+            "ids": [
+              "pen",
+              "book"
+            ],
+            "roles": [
+              "main",
+              "main"
+            ],
+            "heroId": "pen",
+            "reasons": [
+              {
+                "id": "pen",
+                "reason": "запись информации и планирование"
+              },
+              {
+                "id": "book",
+                "reason": "знания, обучение и чтение"
+              }
+            ],
+            "theme": "planning",
+            "themeName": "Планы и цели",
+            "confidence": 0.421
+          },
+          {
+            "ids": [
+              "book",
+              "puzzle"
+            ],
+            "roles": [
+              "main",
+              "main"
+            ],
+            "heroId": "book",
+            "reasons": [
+              {
+                "id": "book",
+                "reason": "знания, обучение и чтение"
+              },
+              {
+                "id": "puzzle",
+                "reason": "сотрудничество и соединение частей"
+              }
+            ],
+            "theme": "learning",
+            "themeName": "Обучение и концентрация",
+            "confidence": 0.38
+          }
+        ],
+        "needsReview": true,
+        "strategy": "semantic-object-retrieval",
+        "engine": "sentence-transformer",
+        "model": "Xenova/paraphrase-multilingual-MiniLM-L12-v2",
+        "explanation": "Есть несколько возможных трактовок. Выберите подходящий смысл."
+      },
+      {
+        "query": "Ночной читальный уголок с мягким светом",
+        "pass": false,
+        "schema": true,
+        "ids": [
+          "headphones",
+          "lamp"
+        ],
+        "roles": [
+          "main",
+          "main"
+        ],
+        "heroId": "headphones",
+        "reasons": [
+          {
+            "id": "headphones",
+            "reason": "аудио или сосредоточенность"
+          },
+          {
+            "id": "lamp",
+            "reason": "вечерняя работа или новая идея"
+          }
+        ],
+        "theme": "music",
+        "themeName": "Музыка и отдых",
+        "confidence": 0.37,
+        "alternatives": [
+          {
+            "ids": [
+              "headphones",
+              "lamp"
+            ],
+            "roles": [
+              "main",
+              "main"
+            ],
+            "heroId": "headphones",
+            "reasons": [
+              {
+                "id": "headphones",
+                "reason": "аудио или сосредоточенность"
+              },
+              {
+                "id": "lamp",
+                "reason": "вечерняя работа или новая идея"
+              }
+            ],
+            "theme": "music",
+            "themeName": "Музыка и отдых",
+            "confidence": 0.37
+          }
+        ],
+        "needsReview": true,
+        "strategy": "semantic-object-retrieval",
+        "engine": "sentence-transformer",
+        "model": "Xenova/paraphrase-multilingual-MiniLM-L12-v2",
+        "explanation": "Есть несколько возможных трактовок. Выберите подходящий смысл."
+      },
+      {
+        "query": "Подарок меломану на праздник",
+        "pass": true,
+        "schema": true,
+        "ids": [
+          "flowers",
+          "headphones"
+        ],
+        "roles": [
+          "main",
+          "background"
+        ],
+        "heroId": "flowers",
+        "reasons": [
+          {
+            "id": "flowers",
+            "reason": "поздравление, подарок и забота"
+          },
+          {
+            "id": "headphones",
+            "reason": "аудио или сосредоточенность"
+          }
+        ],
+        "theme": "care",
+        "themeName": "Забота и подарок",
+        "confidence": 0.546,
+        "alternatives": [
+          {
+            "ids": [
+              "flowers",
+              "headphones"
+            ],
+            "roles": [
+              "main",
+              "background"
+            ],
+            "heroId": "flowers",
+            "reasons": [
+              {
+                "id": "flowers",
+                "reason": "поздравление, подарок и забота"
+              },
+              {
+                "id": "headphones",
+                "reason": "аудио или сосредоточенность"
+              }
+            ],
+            "theme": "care",
+            "themeName": "Забота и подарок",
+            "confidence": 0.546
+          }
+        ],
+        "needsReview": false,
+        "strategy": "semantic-object-retrieval",
+        "engine": "sentence-transformer",
+        "model": "Xenova/paraphrase-multilingual-MiniLM-L12-v2",
+        "explanation": "Забота и подарок. Предметы подобраны по смысловым описаниям библиотеки."
+      },
+      {
+        "query": "Не про деньги, а про музыку в дороге",
+        "pass": true,
+        "schema": false,
+        "ids": [
+          "headphones"
+        ],
+        "roles": [
+          "main"
+        ],
+        "heroId": "headphones",
+        "reasons": [
+          {
+            "id": "headphones",
+            "reason": "аудио или сосредоточенность"
+          }
+        ],
+        "theme": "music",
+        "themeName": "Музыка и отдых",
+        "confidence": 0.643,
+        "alternatives": [
+          {
+            "ids": [
+              "headphones"
+            ],
+            "roles": [
+              "main"
+            ],
+            "heroId": "headphones",
+            "reasons": [
+              {
+                "id": "headphones",
+                "reason": "аудио или сосредоточенность"
+              }
+            ],
+            "theme": "music",
+            "themeName": "Музыка и отдых",
+            "confidence": 0.643
+          }
+        ],
+        "needsReview": false,
+        "strategy": "semantic-object-retrieval",
+        "engine": "sentence-transformer",
+        "model": "Xenova/paraphrase-multilingual-MiniLM-L12-v2",
+        "explanation": "Музыка и отдых. Предметы подобраны по смысловым описаниям библиотеки."
+      },
+      {
+        "query": "Разобраться в семейном бюджете и отложить сбережения",
+        "pass": true,
+        "schema": true,
+        "ids": [
+          "wallet",
+          "coin"
+        ],
+        "roles": [
+          "main",
+          "main"
+        ],
+        "heroId": "wallet",
+        "reasons": [
+          {
+            "id": "wallet",
+            "reason": "расходы, покупки и личный бюджет"
+          },
+          {
+            "id": "coin",
+            "reason": "деньги и накопления"
+          }
+        ],
+        "theme": "savings",
+        "themeName": "Сбережения и финансовая цель",
+        "confidence": 0.654,
+        "alternatives": [
+          {
+            "ids": [
+              "wallet",
+              "coin"
+            ],
+            "roles": [
+              "main",
+              "main"
+            ],
+            "heroId": "wallet",
+            "reasons": [
+              {
+                "id": "wallet",
+                "reason": "расходы, покупки и личный бюджет"
+              },
+              {
+                "id": "coin",
+                "reason": "деньги и накопления"
+              }
+            ],
+            "theme": "savings",
+            "themeName": "Сбережения и финансовая цель",
+            "confidence": 0.654
+          },
+          {
+            "ids": [
+              "wallet",
+              "coin"
+            ],
+            "roles": [
+              "main",
+              "main"
+            ],
+            "heroId": "wallet",
+            "reasons": [
+              {
+                "id": "wallet",
+                "reason": "расходы, покупки и личный бюджет"
+              },
+              {
+                "id": "coin",
+                "reason": "деньги и накопления"
+              }
+            ],
+            "theme": "budget",
+            "themeName": "Личные финансы",
+            "confidence": 0.644
+          }
+        ],
+        "needsReview": false,
+        "strategy": "semantic-object-retrieval",
+        "engine": "sentence-transformer",
+        "model": "Xenova/paraphrase-multilingual-MiniLM-L12-v2",
+        "explanation": "Сбережения и финансовая цель. Предметы подобраны по смысловым описаниям библиотеки."
+      },
+      {
+        "query": "Оформить бумаги перед собеседованием",
+        "pass": true,
+        "schema": true,
+        "ids": [
+          "pen",
+          "folder"
+        ],
+        "roles": [
+          "main",
+          "main"
+        ],
+        "heroId": "pen",
+        "reasons": [
+          {
+            "id": "pen",
+            "reason": "запись информации и планирование"
+          },
+          {
+            "id": "folder",
+            "reason": "хранение материалов и порядок"
+          }
+        ],
+        "theme": "planning",
+        "themeName": "Планы и цели",
+        "confidence": 0.539,
+        "alternatives": [
+          {
+            "ids": [
+              "pen",
+              "folder"
+            ],
+            "roles": [
+              "main",
+              "main"
+            ],
+            "heroId": "pen",
+            "reasons": [
+              {
+                "id": "pen",
+                "reason": "запись информации и планирование"
+              },
+              {
+                "id": "folder",
+                "reason": "хранение материалов и порядок"
+              }
+            ],
+            "theme": "planning",
+            "themeName": "Планы и цели",
+            "confidence": 0.539
+          },
+          {
+            "ids": [
+              "book",
+              "pen"
+            ],
+            "roles": [
+              "main",
+              "main"
+            ],
+            "heroId": "book",
+            "reasons": [
+              {
+                "id": "book",
+                "reason": "знания, обучение и чтение"
+              },
+              {
+                "id": "pen",
+                "reason": "запись информации и планирование"
+              }
+            ],
+            "theme": "learning",
+            "themeName": "Обучение и концентрация",
+            "confidence": 0.458
+          },
+          {
+            "ids": [
+              "folder",
+              "pen"
+            ],
+            "roles": [
+              "main",
+              "main"
+            ],
+            "heroId": "folder",
+            "reasons": [
+              {
+                "id": "folder",
+                "reason": "хранение материалов и порядок"
+              },
+              {
+                "id": "pen",
+                "reason": "запись информации и планирование"
+              }
+            ],
+            "theme": "organization",
+            "themeName": "Порядок в делах",
+            "confidence": 0.444
+          }
+        ],
+        "needsReview": false,
+        "strategy": "semantic-object-retrieval",
+        "engine": "sentence-transformer",
+        "model": "Xenova/paraphrase-multilingual-MiniLM-L12-v2",
+        "explanation": "Планы и цели. Предметы подобраны по смысловым описаниям библиотеки."
+      },
+      {
+        "query": "Вечер головоломок без экрана",
+        "pass": false,
+        "schema": true,
+        "ids": [
+          "headphones",
+          "book"
+        ],
+        "roles": [
+          "main",
+          "main"
+        ],
+        "heroId": "headphones",
+        "reasons": [
+          {
+            "id": "headphones",
+            "reason": "аудио или сосредоточенность"
+          },
+          {
+            "id": "book",
+            "reason": "знания, обучение и чтение"
+          }
+        ],
+        "theme": "music",
+        "themeName": "Музыка и отдых",
+        "confidence": 0.331,
+        "alternatives": [
+          {
+            "ids": [
+              "headphones",
+              "book"
+            ],
+            "roles": [
+              "main",
+              "main"
+            ],
+            "heroId": "headphones",
+            "reasons": [
+              {
+                "id": "headphones",
+                "reason": "аудио или сосредоточенность"
+              },
+              {
+                "id": "book",
+                "reason": "знания, обучение и чтение"
+              }
+            ],
+            "theme": "music",
+            "themeName": "Музыка и отдых",
+            "confidence": 0.331
+          },
+          {
+            "ids": [
+              "headphones",
+              "book",
+              "lamp"
+            ],
+            "roles": [
+              "main",
+              "main",
+              "background"
+            ],
+            "heroId": "headphones",
+            "reasons": [
+              {
+                "id": "headphones",
+                "reason": "аудио или сосредоточенность"
+              },
+              {
+                "id": "book",
+                "reason": "знания, обучение и чтение"
+              },
+              {
+                "id": "lamp",
+                "reason": "вечерняя работа или новая идея"
+              }
+            ],
+            "theme": "focus",
+            "themeName": "Внимание и продуктивность",
+            "confidence": 0.313
+          },
+          {
+            "ids": [
+              "book",
+              "lamp"
+            ],
+            "roles": [
+              "main",
+              "background"
+            ],
+            "heroId": "book",
+            "reasons": [
+              {
+                "id": "book",
+                "reason": "знания, обучение и чтение"
+              },
+              {
+                "id": "lamp",
+                "reason": "вечерняя работа или новая идея"
+              }
+            ],
+            "theme": "learning",
+            "themeName": "Обучение и концентрация",
+            "confidence": 0.31
+          }
+        ],
+        "needsReview": true,
+        "strategy": "semantic-object-retrieval",
+        "engine": "sentence-transformer",
+        "model": "Xenova/paraphrase-multilingual-MiniLM-L12-v2",
+        "explanation": "Есть несколько возможных трактовок. Выберите подходящий смысл."
+      },
+      {
+        "query": "Спутник выходит на орбиту Юпитера",
+        "pass": true,
+        "schema": true,
+        "ids": [],
+        "roles": [],
+        "alternatives": [],
+        "needsReview": false,
+        "engine": "sentence-transformer",
+        "model": "Xenova/paraphrase-multilingual-MiniLM-L12-v2",
+        "explanation": "В исходной библиотеке не нашлось убедительной метафоры для этой темы. Уточните смысл или выберите объекты."
+      }
+    ]
+  },
+  "geometry_review": {
+    "cases": 162,
+    "failures": 0
+  }
+}

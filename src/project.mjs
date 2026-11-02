@@ -20,7 +20,8 @@ export function restoreProject(text,catalog){
   const palette=validatePalette(s.palette);
   if(s.backgroundStyle!==undefined&&(!Number.isInteger(s.backgroundStyle)||s.backgroundStyle<0||s.backgroundStyle>2))throw Error('Неизвестный вариант декоративного фона.');
   const backgroundStyle=s.backgroundStyle??Math.max(0,catalog.palettes.findIndex(p=>p.id===palette.id));
-  const scene={width:s.width,height:s.height,detail:s.detail,layout:s.layout,variant:s.variant,background:s.background,backgroundStyle,palette,title:String(s.title||'').slice(0,500),items};
+  if(s.heroId!=null&&(!ids.has(s.heroId)||!items.some(i=>i.assetId===s.heroId)))throw Error('Смысловой центр отсутствует в проекте.');
+  const scene={width:s.width,height:s.height,detail:s.detail,layout:s.layout,variant:s.variant,background:s.background,backgroundStyle,heroId:s.heroId??null,palette,title:String(s.title||'').slice(0,500),items};
   const ui={mode:data.ui?.mode==='components'?'components':'meaning',prompt:typeof data.ui?.prompt==='string'?data.ui.prompt.slice(0,500):scene.title};
   return {scene,ui};
 }

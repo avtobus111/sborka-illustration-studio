@@ -4,6 +4,18 @@ import fs from 'node:fs';
 import { selectObjects, createScene, renderSVG, validatePalette, setDetail, arrangeScene } from '../src/core.mjs';
 const catalog = JSON.parse(fs.readFileSync(new URL('../assets/catalog.json', import.meta.url)));
 
+test('смысловой центр и правила пар сохраняют геометрию во всех форматах',()=>{
+ for(const detail of ['S','L'])for(const [width,height]of [[1200,630],[1080,1080],[1080,1440]])for(const variant of [0,1,2])for(const [heroId,supportId]of [['phone','puzzle'],['wallet','coin'],['book','lamp']]){
+  const s=createScene({ids:[supportId,heroId],heroId,width,height,variant,detail},catalog);
+  assert.equal(s.heroId,heroId);
+  const hero=s.items.find(i=>i.assetId===heroId),support=s.items.find(i=>i.assetId===supportId),a=catalog.objects.find(o=>o.id===heroId).variants[detail].main,b=catalog.objects.find(o=>o.id===supportId).variants[detail].main;
+  assert.equal(hero.scale,support.scale);
+  for(const i of s.items){const v=catalog.objects.find(o=>o.id===i.assetId).variants[detail].main;assert.ok(i.x>=0&&i.y>=0&&i.x+v.width*i.scale<=width+.1&&i.y+v.height*i.scale<=height+.1);}
+  if(heroId==='phone')assert.ok(support.y>=hero.y+a.height*hero.scale*.6);
+  if(heroId==='wallet')assert.ok(support.y+b.height*support.scale/2<=hero.y+a.height*hero.scale*.25);
+ }
+});
+
 test('варианты различаются и у одного предмета, и в большой сцене',()=>{
   for(const ids of [['phone'],['book','phone','puzzle','pen','lamp','folder']]){
     const variants=[0,1,2].map(variant=>createScene({ids,width:1200,height:630,variant},catalog));
