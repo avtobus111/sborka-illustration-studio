@@ -1,0 +1,62 @@
+[
+  {
+    "file": "01-learning.svg",
+    "query": "Учиться и сохранять фокус",
+    "ids": [
+      "headphones",
+      "lamp",
+      "book"
+    ],
+    "roles": [
+      "main",
+      "main",
+      "background"
+    ],
+    "theme": "focus",
+    "themeName": "Внимание и продуктивность",
+    "confidence": 0.631,
+    "engine": "sentence-transformer",
+    "model": "Xenova/paraphrase-multilingual-MiniLM-L12-v2",
+    "explanation": "Внимание и продуктивность. Объекты подобраны локальной языковой моделью."
+  },
+  {
+    "file": "02-savings.svg",
+    "query": "Копить на мечту",
+    "ids": [
+      "wallet",
+      "coin",
+      "folder"
+    ],
+    "roles": [
+      "main",
+      "main",
+      "background"
+    ],
+    "theme": "savings",
+    "themeName": "Сбережения и финансовая цель",
+    "confidence": 0.541,
+    "engine": "sentence-transformer",
+    "model": "Xenova/paraphrase-multilingual-MiniLM-L12-v2",
+    "explanation": "Сбережения и финансовая цель. Объекты подобраны локальной языковой моделью."
+  },
+  {
+    "file": "03-teamwork.svg",
+    "query": "Найти общий язык",
+    "ids": [
+      "phone",
+      "puzzle",
+      "pen"
+    ],
+    "roles": [
+      "main",
+      "main",
+      "background"
+    ],
+    "theme": "communication",
+    "themeName": "Общение и взаимопонимание",
+    "confidence": 0.684,
+    "engine": "sentence-transformer",
+    "model": "Xenova/paraphrase-multilingual-MiniLM-L12-v2",
+    "explanation": "Общение и взаимопонимание. Объекты подобраны локальной языковой моделью."
+  }
+]

@@ -1,0 +1,5 @@
+node_modules/
+.superpowers/
+models/
+*.log
+qa/*.raw

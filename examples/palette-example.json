@@ -1,0 +1,15 @@
+{
+  "name": "Моя палитра",
+  "background": [
+    "#D7CDF5",
+    "#AA9BF0",
+    "#7864D7"
+  ],
+  "objects": [
+    "#F9ECB0",
+    "#F9A3AA",
+    "#FFE3E1",
+    "#181817",
+    "#FFFFFF"
+  ]
+}
