@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: sborka-illustration-studio
+    runtime: node
+    plan: free
+    branch: main
+    autoDeployTrigger: "off"
+    buildCommand: npm ci && npm run setup:model && npm run build
+    startCommand: npm start
+    healthCheckPath: /healthz
+    envVars:
+      - key: NODE_VERSION
+        value: 22.23.2
+      - key: NODE_ENV
+        value: production
+      - key: HOST
+        value: 0.0.0.0
+      - key: MALLOC_ARENA_MAX
+        value: "2"

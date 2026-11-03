@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createStudioServer} from '../scripts/serve.mjs';
+import * as serverModule from '../scripts/serve.mjs';
 import fs from 'node:fs';
 import {createScene} from '../src/core.mjs';
 import {serializeProject,restoreProject} from '../src/project.mjs';
@@ -45,4 +46,19 @@ test('слишком длинный запрос не передаётся мо�
 });
 test('неподдерживаемые маршруты получают 404',async()=>{
   assert.equal((await fetch(base+'/../package.json')).status,404);
+});
+
+
+test('локальный запуск остаётся на loopback, хостинг принимает HOST и PORT',()=>{
+  assert.deepEqual(serverModule.getListenAddress({}),{host:'127.0.0.1',port:4173});
+  assert.deepEqual(serverModule.getListenAddress({HOST:'0.0.0.0',PORT:'10000'}),{host:'0.0.0.0',port:10000});
+  for(const PORT of ['0','65536','abc','4173.5','-1'])assert.throws(()=>serverModule.getListenAddress({PORT}),/PORT/);
+});
+
+test('healthcheck подтверждает готовую модель и возвращает 503 при её недоступности',async()=>{
+  await app.model;
+  let r=await fetch(base+'/healthz');assert.equal(r.status,200);assert.equal((await r.json()).ready,true);
+  app.state.ready=false;
+  try {r=await fetch(base+'/healthz');assert.equal(r.status,503);assert.equal((await r.json()).ready,false);}
+  finally {app.state.ready=true;}
 });

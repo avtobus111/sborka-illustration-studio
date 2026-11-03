@@ -8,6 +8,12 @@ import {restoreProject,serializeProject} from '../src/project.mjs';
 const project=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const catalog=JSON.parse(fs.readFileSync(path.join(project,'assets/catalog.json'),'utf8'));
 
+export function getListenAddress(env=process.env){
+  const port=Number(env.PORT||4173),host=env.HOST||'127.0.0.1';
+  if(!Number.isInteger(port)||port<1||port>65535)throw Error('PORT должен быть целым числом от 1 до 65535.');
+  return {host,port};
+}
+
 export async function createStudioServer(){
   const state={ready:false,model:MODEL_ID,error:null};
   const model=createSemanticSelector(catalog).then(value=>{state.ready=true;return value;}).catch(error=>{state.error='Модель не загружена. Выполните npm run setup:model и перезапустите сервер.';return null;});
@@ -17,6 +23,7 @@ export async function createStudioServer(){
       const url=new URL(req.url,'http://localhost');
       if(req.method==='OPTIONS'){res.writeHead(204,{'Access-Control-Allow-Origin':'*','Access-Control-Allow-Methods':'POST, GET, OPTIONS','Access-Control-Allow-Headers':'Content-Type'});res.end();return;}
       if(req.method==='GET'&&url.pathname==='/api/status'){send(200,state);return;}
+      if(req.method==='GET'&&url.pathname==='/healthz'){send(state.ready?200:503,{ready:state.ready});return;}
       if(req.method==='POST'&&['/api/export/svg','/api/export/project'].includes(url.pathname)){
         let body='';for await(const chunk of req){body+=chunk;if(Buffer.byteLength(body)>1500000){send(413,{error:'Проект слишком большой.'});return;}}
         let restored;try{restored=restoreProject(new URLSearchParams(body).get('project'),catalog);}catch(error){send(400,{error:error.message});return;}
@@ -40,8 +47,8 @@ export async function createStudioServer(){
 }
 
 if(process.argv[1]&&path.resolve(process.argv[1])===fileURLToPath(import.meta.url)){
-  const app=await createStudioServer();const port=Number(process.env.PORT||4173);
-  app.server.listen(port,'127.0.0.1',()=>console.log(`Сборка: http://127.0.0.1:${port}`));
+  const {host,port}=getListenAddress();const app=await createStudioServer();
+  app.server.listen(port,host,()=>console.log(`Сборка: http://${host}:${port}`));
   app.server.on('error',error=>{console.error(error.code==='EADDRINUSE'?'Этот порт уже занят. Откройте существующую студию или задайте PORT.':error.message);process.exitCode=1;app.server.close();});
   app.model.then(value=>console.log(value?'Локальная языковая модель готова.':'Модель недоступна: npm run setup:model'));
 }
