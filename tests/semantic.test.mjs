@@ -5,6 +5,33 @@ import {createSemanticSelector} from '../src/semantic.mjs';
 const catalog=JSON.parse(fs.readFileSync(new URL('../assets/catalog.json',import.meta.url)));
 const selector=await createSemanticSelector(catalog);
 
+test('производные слова проходят смысловой подбор вместо обхода по названиям',async()=>{
+ for(const query of ['монетизация','телефония'])assert.notEqual((await selector.select(query)).engine,'catalog-names');
+});
+
+test('финансовая метафора сохраняет сильную пару без слабой фоновой ручки',async()=>{
+ const r=await selector.select('Копить на мечту');
+ assert.deepEqual(new Set(r.ids),new Set(['wallet','coin']));
+});
+
+test('явно названная головоломка имеет приоритет над вечерней темой',async()=>{
+ const r=await selector.select('Вечер головоломок без телефона');
+ assert.ok(r.ids.includes('puzzle'));assert.equal(r.heroId,'puzzle');assert.ok(!r.ids.includes('phone'));
+ assert.ok(r.alternatives.every(a=>a.ids.includes('puzzle')&&!a.ids.includes('phone')));
+});
+
+test('читальный уголок содержит книгу во всех предложенных трактовках',async()=>{
+ const r=await selector.select('Ночной читальный уголок с мягким светом');
+ assert.ok(r.ids.includes('book'));assert.equal(r.heroId,'book');
+ assert.ok(r.alternatives.every(a=>a.ids.includes('book')));
+});
+
+test('чистое перечисление предметов не дополняется случайными соседями',async()=>{
+ const r=await selector.select('смартфон, пазлы и книга');
+ assert.deepEqual(r.ids,['phone','puzzle','book']);assert.equal(r.strategy,'explicit-components');assert.equal(r.needsReview,false);
+ const single=await selector.select('светильник');assert.deepEqual(single.ids,['lamp']);
+});
+
 test('простая финансовая метафора не заполняется отвлекающими предметами',async()=>{
  const r=await selector.select('Копить на мечту');
  assert.ok(r.ids.includes('wallet')&&r.ids.includes('coin'));
@@ -80,4 +107,11 @@ test('одинаковый запрос даёт одинаковые ID',async(
 });
 for(const query of ['Срочно вылечить зуб','Сварить борщ для всей семьи','блаблабла труляля'])test(`неподдерживаемый или неопределённый смысл: ${query}`,async()=>{
   assert.equal((await selector.select(query)).ids.length,0);
+});
+test('исключения, положительный префикс и цветок сохраняют буквальный смысл',async()=>{
+ assert.deepEqual((await selector.select('Без телефона, кошелька и монет')).ids,[]);
+ const r=await selector.select('Книга: не про деньги, а про музыку в дороге');
+ assert.ok(r.ids.includes('book')&&r.ids.includes('headphones'),JSON.stringify(r));
+ assert.ok(r.alternatives.every(a=>a.ids.includes('book')));
+ assert.deepEqual((await selector.select('Цветок и ручка')).ids,['flowers','pen']);
 });

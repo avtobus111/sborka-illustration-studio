@@ -3,6 +3,7 @@ import {fileURLToPath} from 'node:url';
 import {pipeline,env} from '@huggingface/transformers';
 import {semanticProfiles,unsupportedTopics} from './semantic-profiles.mjs';
 import {objectConcepts,intentAnchors,objectContexts} from './object-concepts.mjs';
+import {readComponentNames} from './component-names.mjs';
 
 export const MODEL_ID='Xenova/paraphrase-multilingual-MiniLM-L12-v2';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
@@ -36,7 +37,12 @@ export async function createSemanticSelector(catalog){
       if(text.length>500)throw Error('Запрос должен быть короче 500 символов.');
       if(!/[а-яёa-z]{3}/i.test(text))return empty('Нужна осмысленная фраза словами.');
       if(cache.has(text))return structuredClone(cache.get(text));
-      const positive=text.match(/не\s+(?:про|о)\s+.+?\s+а\s+(?:про|о)\s+(.+)$/i)?.[1]||text;
+      const positive=text.replace(/не\s+(?:про|о)\s+.+?\s+а\s+(?:про|о)\s+/i,'');
+      const named=readComponentNames(positive);named.ids=named.ids.filter(id=>validIds.has(id));
+      if(named.onlyNames&&named.mentions.length&&!named.ids.length)return empty('После исключений не осталось указанных предметов.');
+      if(named.ids.length&&named.onlyNames){
+        return {ids:named.ids,roles:named.ids.map(()=>'main'),heroId:named.ids[0],reasons:named.ids.map(id=>({id,reason:'явно указан в запросе'})),theme:'components',themeName:'Указанные предметы',alternatives:[],needsReview:false,strategy:'explicit-components',engine:'catalog-names',explanation:'Собрано из явно указанных предметов.'};
+      }
       const vector=(await encoder(positive,{pooling:'mean',normalize:true,truncation:true,max_length:192})).tolist()[0];
       const fragments=positive.split(/\s+(?:и|а также|вместе с|над|чтобы|помогает|помогают)\s+|[,;:]/i).map(s=>s.trim()).filter(s=>s.length>=4&&s!==text&&!/^(?:не\s+(?:про|о)|без)\s/i.test(s)).slice(0,5);
       const fragmentVectors=[];
@@ -46,30 +52,32 @@ export async function createSemanticSelector(catalog){
         const ranks=objectConcepts.map(object=>({id:object.id,score:Math.max(...objectEntries.flatMap((entry,i)=>entry.object===object?[cosine(v,objectEmbeddings[i])]:[]))})).sort((a,b)=>b.score-a.score);
         return ranks.filter(r=>r.score>=Math.max(.48,ranks[0].score-.08)).slice(0,2);
       }).sort((a,b)=>b.score-a.score);
-      const ranks=semanticProfiles.map(profile=>({profile,score:Math.max(...entries.flatMap((entry,i)=>entry.profile===profile?[cosine(vector,embeddings[i])]:[]))})).sort((a,b)=>b.score-a.score);
+      let ranks=semanticProfiles.map(profile=>({profile,score:Math.max(...entries.flatMap((entry,i)=>entry.profile===profile?[cosine(vector,embeddings[i])]:[]))})).sort((a,b)=>b.score-a.score);
+      if(named.ids.length&&ranks[0].score<.50){const matching=ranks.find(r=>intentAnchors[r.profile.id].some(id=>named.ids.includes(id))&&r.score>=ranks[0].score-.20);if(matching)ranks=[matching,...ranks.filter(r=>r!==matching)];}
       const unsupported=Math.max(...embeddings.slice(entries.length).map(v=>cosine(vector,v)));
       const best=ranks[0];
       const words=text.match(/[а-яёa-z]+/gi)||[];
       const tokenized=await encoder.tokenizer(text,{truncation:true,max_length:192});
       const fragmented=words.length>=2&&(tokenized.input_ids.dims[1]-2)/words.length>3;
       const objectBest=objectRanks[0].score;
-      if((best.score<.33&&objectBest<.45)||unsupported>Math.max(best.score,objectBest)+.005||(fragmented&&Math.max(best.score,objectBest)<.55))return empty('В исходной библиотеке не нашлось убедительной метафоры для этой темы. Уточните смысл или выберите объекты.');
+      if(!named.ids.length&&((best.score<.33&&objectBest<.45)||unsupported>Math.max(best.score,objectBest)+.005||(fragmented&&Math.max(best.score,objectBest)<.55)))return empty('В исходной библиотеке не нашлось убедительной метафоры для этой темы. Уточните смысл или выберите объекты.');
       function sceneFor(profile,score){
-        const anchors=intentAnchors[profile.id];
+        const anchors=[...new Set([...named.ids,...intentAnchors[profile.id].filter(id=>!named.excluded.includes(id)&&(!named.ids.length||named.ids.includes(id)||objectRanks.find(r=>r.object.id===id).score>=.45))])];
         const selected=[...anchors];
         for(const rank of coverage)if(selected.length<4&&!selected.includes(rank.id))selected.push(rank.id);
         if(selected.includes('coin')&&!selected.includes('wallet')&&objectRanks.find(r=>r.object.id==='wallet').score>=.30&&selected.length<4)selected.push('wallet');
-        const threshold=Math.max(.45,objectBest-.08);
+        // Keep a close second concept, but demand stronger absolute evidence
+        // for incidental additions far below the best object match.
+        const threshold=Math.max(.45,objectBest-.08,Math.min(.50,objectBest-.04));
         for(const rank of objectRanks){if(selected.length>=4)break;if(rank.score>=threshold&&objectContexts[rank.object.id].includes(profile.id)&&!selected.includes(rank.object.id))selected.push(rank.object.id);}
-        // A sparse query gets two objects; an unrelated filler is never mandatory.
-        if(selected.length===1&&objectRanks[1].score>=.30)selected.push(objectRanks.find(r=>!selected.includes(r.object.id)).object.id);
-        const ids=selected.filter(id=>validIds.has(id));
+        const ids=selected.filter(id=>validIds.has(id)&&!named.excluded.includes(id));
         const roles=ids.map(id=>anchors.includes(id)||objectRanks.find(r=>r.object.id===id).score>=objectBest-.04?'main':'background');
-        return {ids,roles,heroId:anchors[0],reasons:ids.map(id=>({id,reason:objectConcepts.find(o=>o.id===id).reason})),theme:profile.id,themeName:profile.name,confidence:Number(score.toFixed(3))};
+        return {ids,roles,heroId:named.ids[0]||anchors.find(id=>ids.includes(id))||ids[0],reasons:ids.map(id=>({id,reason:named.ids.includes(id)?'явно указан в запросе':objectConcepts.find(o=>o.id===id).reason})),theme:profile.id,themeName:profile.name,confidence:Number(score.toFixed(3))};
       }
       const alternatives=ranks.filter((r,i)=>i===0||r.score>=Math.max(.30,best.score-.12)).slice(0,3).map(({profile,score})=>sceneFor(profile,score));
       const needsReview=best.score<.45||(best.score<.6&&best.score-ranks[1].score<.025);
       const result={...alternatives[0],alternatives,needsReview,strategy:'semantic-object-retrieval',engine:'sentence-transformer',model:MODEL_ID,explanation:needsReview?'Есть несколько возможных трактовок. Выберите подходящий смысл.':`${best.profile.name}. Предметы подобраны по смысловым описаниям библиотеки.`};
+      if(!result.ids.length)return empty('После исключений не осталось подходящих предметов. Укажите нужные объекты.');
       if(!result.ids.includes(result.heroId))throw Error('Смысловая опора отсутствует в каталоге.');
       if(cache.size>=100)cache.delete(cache.keys().next().value);cache.set(text,result);
       return structuredClone(result);

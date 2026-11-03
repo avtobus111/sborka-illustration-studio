@@ -1072,5 +1072,7 @@
   "geometry_review": {
     "cases": 162,
     "failures": 0
-  }
+  },
+  "status": "historical_previous_revision",
+  "current_revision_not_measured": true
 }

@@ -1,3 +1,4 @@
+import {readComponentNames} from './component-names.mjs';
 const normalize = value => String(value).toLowerCase().replaceAll('ё','е');
 const escapeXML = value => String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&apos;'}[c]));
 const n = value => Number(Number(value).toFixed(5));
@@ -7,6 +8,10 @@ export const MAX_ITEMS = 50;
 export function selectObjects(query, catalog, mode='meaning') {
   const q=normalize(query).trim();
   if(!q) return {ids:[],explanation:'Введите заголовок или выберите объекты.'};
+  if(mode==='components'){
+    const named=readComponentNames(q),ids=named.ids.filter(id=>catalog.objects.some(o=>o.id===id));
+    return {ids,unmatched:named.unmatched,explanation:named.unmatched.length?`Не распознано в библиотеке: ${named.unmatched.join(', ')}. ${ids.length?'Собраны доступные предметы. ':''}Выберите замену в библиотеке.`:ids.length?'Выбраны указанные предметы библиотеки.':'Укажите предметы или выберите их в библиотеке.'};
+  }
   const words=q.split(/[^a-zа-я0-9]+/).filter(Boolean);
   const ranked=catalog.objects.map((object,index)=>{
     const names=[normalize(object.name),object.id];
@@ -86,10 +91,13 @@ export function arrangeScene(scene,catalog) {
           :{x:h.x+hero.asset.width*(.78+(k%2)*.56),y:h.y+hero.asset.height*(.68+Math.floor(k/2)*.65)};
       if(scene.layout==='diagonal')positions[other.i].y+=maxH*(.20+k*.12);
       const pair=`${scene.items[hero.i].assetId}:${scene.items[other.i].assetId}`;
-      if(pair==='phone:puzzle')positions[other.i]={x:h.x+(variant===1?-other.asset.width*.40:hero.asset.width*(variant===0?.62:.70)),y:h.y+hero.asset.height*[.78,.70,.65][variant]};
+      if(pair==='phone:puzzle')positions[other.i]=tall
+        ?{x:h.x+hero.asset.width*[.12,.30,-.08][variant],y:h.y+hero.asset.height*[1.02,.94,1.14][variant]}
+        :{x:h.x+(variant===1?-other.asset.width*.40:hero.asset.width*(variant===0?.62:.70)),y:h.y+hero.asset.height*[.78,.70,.65][variant]};
       if(pair==='wallet:coin')positions[other.i]={x:h.x+[hero.asset.width*.72,-other.asset.width*.12,hero.asset.width*.40][variant],y:h.y-other.asset.height*[.58,.90,1.05][variant]};
       if(pair==='book:lamp')positions[other.i]={x:h.x+(variant===1?-other.asset.width*.70:hero.asset.width*(variant===0?.75:.80)),y:h.y+(variant===2?hero.asset.height*.12:-other.asset.height*(variant===0?.18:.12))};
     });
+    preserveMainReadability(positions,assets,scene.items,variant,area.w/area.h);
     const minX=Math.min(...positions.map(p=>p.x)),minY=Math.min(...positions.map(p=>p.y));
     const w=Math.max(...assets.map((a,i)=>positions[i].x+a.width))-minX;
     const h=Math.max(...assets.map((a,i)=>positions[i].y+a.height))-minY;
@@ -124,6 +132,36 @@ export function arrangeScene(scene,catalog) {
     y+=(row.h+gap)*best.scale;
   }
   return scene;
+}
+
+function preserveMainReadability(positions,assets,items,variant,areaRatio){
+ const indices=items.map((item,i)=>item.role==='main'?i:-1).filter(i=>i>=0);
+ const placed=[],covered=new Map(),limit=.16;
+ const maxW=Math.max(...assets.map(a=>a.width)),maxH=Math.max(...assets.map(a=>a.height));
+ const gap=Math.max(maxW,maxH)*(.018+variant*.012);
+ const overlap=(a,b)=>Math.max(0,Math.min(a.x+a.w,b.x+b.w)-Math.max(a.x,b.x))*Math.max(0,Math.min(a.y+a.h,b.y+b.h)-Math.max(a.y,b.y));
+ for(const i of indices){
+  const original={...positions[i]},asset=assets[i];
+  const rectangle=p=>({x:p.x,y:p.y,w:asset.width,h:asset.height});
+  const feasible=p=>placed.every(b=>(covered.get(b.i)||0)+overlap(b,rectangle(p))/(b.w*b.h)<=limit+1e-10);
+  let chosen=original;
+  if(!feasible(chosen)){
+   const xs=[original.x],ys=[original.y];
+   for(const b of placed){xs.push(b.x+b.w+gap,b.x-asset.width-gap);ys.push(b.y+b.h+gap,b.y-asset.height-gap);}
+   let best=Infinity;
+   for(const x of xs)for(const y of ys){
+    const candidate={x,y};if(!feasible(candidate))continue;
+    const points=positions.map((p,k)=>k===i?candidate:p);
+    const w=Math.max(...points.map((p,k)=>p.x+assets[k].width))-Math.min(...points.map(p=>p.x));
+    const h=Math.max(...points.map((p,k)=>p.y+assets[k].height))-Math.min(...points.map(p=>p.y));
+    const score=((x-original.x)/maxW)**2+((y-original.y)/maxH)**2+.06*Math.abs(Math.log((w/h)/areaRatio));
+    if(score<best){best=score;chosen=candidate;}
+   }
+  }
+  positions[i]=chosen;const rect={...rectangle(chosen),i};
+  for(const b of placed)covered.set(b.i,(covered.get(b.i)||0)+overlap(b,rect)/(b.w*b.h));
+  placed.push(rect);covered.set(i,0);
+ }
 }
 
 export function compositionVariant(scene,catalog,variant){

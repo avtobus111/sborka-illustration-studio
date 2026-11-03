@@ -4,6 +4,47 @@ import fs from 'node:fs';
 import { selectObjects, createScene, renderSVG, validatePalette, setDetail, arrangeScene } from '../src/core.mjs';
 const catalog = JSON.parse(fs.readFileSync(new URL('../assets/catalog.json', import.meta.url)));
 
+test('производные темы не принимаются за буквальные названия предметов',()=>{
+ const r=selectObjects('книга, монетизация, телефония',catalog,'components');
+ assert.deepEqual(r.ids,['book']);assert.deepEqual(r.unmatched,['монетизация','телефония']);
+ assert.deepEqual(selectObjects('телефона, смартфона, монетами',catalog,'components').ids,['phone','coin']);
+});
+
+test('частично распознанный список сообщает о неизвестном предмете',()=>{
+ const r=selectObjects('книга и самолёт',catalog,'components');
+ assert.deepEqual(r.ids,['book']);assert.deepEqual(r.unmatched,['самолет']);
+ assert.match(r.explanation,/самолет/);
+ assert.deepEqual(selectObjects('книга, без телефона',catalog,'components').unmatched,[]);
+ assert.deepEqual(selectObjects('самолёт',catalog,'components').ids,[]);
+});
+
+test('вертикальная пара использует высоту и сохраняет общий масштаб',()=>{
+ for(const detail of ['S','L'])for(const variant of [0,1,2]){
+  const s=createScene({ids:['phone','puzzle'],heroId:'phone',width:1080,height:1440,detail,variant},catalog);
+  const bounds=s.items.map(i=>{const a=catalog.objects.find(o=>o.id===i.assetId).variants[detail].main;return {x:i.x,y:i.y,right:i.x+a.width*i.scale,bottom:i.y+a.height*i.scale};});
+  assert.ok(Math.max(...bounds.map(b=>b.bottom))-Math.min(...bounds.map(b=>b.y))>=1440*.60,`${detail} ${variant}`);
+  assert.equal(new Set(s.items.map(i=>i.scale)).size,1);
+ }
+});
+
+test('названия, словоформы и предметные синонимы дают запрошенный набор',()=>{
+ assert.deepEqual(selectObjects('смартфон, головоломки, учебник',catalog,'components').ids,['phone','puzzle','book']);
+ assert.deepEqual(selectObjects('книги, без телефона, ручку',catalog,'components').ids,['book','pen']);
+ assert.deepEqual(selectObjects('цветовая схема',catalog,'components').ids,[]);
+});
+
+test('главные предметы сохраняют не менее 80 процентов прямоугольника от последующих перекрытий',()=>{
+ for(const ids of [['headphones','book'],['phone','puzzle','lamp','pen'],['book','headphones','lamp','wallet','folder']])for(const detail of ['S','L'])for(const [width,height]of [[1200,630],[1080,1080],[1080,1440]])for(const variant of [0,1,2]){
+  const scene=createScene({ids,heroId:ids[0],detail,width,height,variant},catalog);
+  const main=scene.items.filter(i=>i.role==='main').map(i=>{const a=catalog.objects.find(o=>o.id===i.assetId).variants[detail].main;return {x:i.x,y:i.y,w:a.width*i.scale,h:a.height*i.scale};});
+  for(let i=0;i<main.length;i++){
+   const a=main[i];let covered=0;
+   for(const b of main.slice(i+1))covered+=Math.max(0,Math.min(a.x+a.w,b.x+b.w)-Math.max(a.x,b.x))*Math.max(0,Math.min(a.y+a.h,b.y+b.h)-Math.max(a.y,b.y));
+   assert.ok(covered/(a.w*a.h)<=.2+.00001,`${ids} ${detail} ${width} ${variant}: ${covered/(a.w*a.h)}`);
+  }
+ }
+});
+
 test('смысловой центр и правила пар сохраняют геометрию во всех форматах',()=>{
  for(const detail of ['S','L'])for(const [width,height]of [[1200,630],[1080,1080],[1080,1440]])for(const variant of [0,1,2])for(const [heroId,supportId]of [['phone','puzzle'],['wallet','coin'],['book','lamp']]){
   const s=createScene({ids:[supportId,heroId],heroId,width,height,variant,detail},catalog);
@@ -137,3 +178,9 @@ test('перестановка вариантов не передаёт сост
     assert.equal(s.items.find(x=>x.assetId==='phone').role,'main');
   }
 });
+test('список исключений и единственное число цветка разбираются буквально',()=>{
+ assert.deepEqual(selectObjects('Без телефона, кошелька и монет',catalog,'components').ids,[]);
+ assert.deepEqual(selectObjects('Цветок и ручка',catalog,'components').ids,['flowers','pen']);
+ assert.deepEqual(selectObjects('книги, без телефона, ручку',catalog,'components').ids,['book','pen']);
+});
+

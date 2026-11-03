@@ -81,7 +81,7 @@ function downloadProjectFile(kind){
 }
 function applySelection(result,query){
   remember();scene=createScene({ids:result.ids,roles:result.roles,heroId:result.heroId,width:scene.width,height:scene.height,detail:scene.detail,palette:scene.palette,layout:scene.layout,background:scene.background,backgroundStyle:scene.backgroundStyle,variant:scene.variant},catalog);
-  scene.title=query.trim().slice(0,160)||'Композиция';scene.semantic=result.engine?{theme:result.theme,themeName:result.themeName,engine:result.engine}:null;chosen=new Set(result.ids);selected=null;changed(`${result.ids.length} объекта · ${result.themeName||result.explanation}`);
+  scene.title=query.trim().slice(0,160)||'Композиция';scene.semantic=result.engine?{theme:result.theme,themeName:result.themeName,engine:result.engine}:null;chosen=new Set(result.ids);selected=null;changed(`Объектов: ${result.ids.length} · ${result.themeName||result.explanation}`);
 }
 function showMeaningChoices(result,query,version,needsReview){
   if(!result.alternatives?.length)return;
@@ -108,7 +108,7 @@ async function build(){
     }
     else {
       const typed=selectObjects($('prompt').value,catalog,'components');
-      result={ids:typed.ids,explanation:'Собрано из выбранных объектов.'};
+      result=typed;
     }
     if(version!==buildVersion)return;
     if(!result.ids.length){status(result.explanation||'Выберите объекты в библиотеке.',true);return;}

@@ -51,22 +51,16 @@
       },
       {
         "ids": [
-          "book",
-          "lamp"
+          "book"
         ],
         "roles": [
-          "main",
-          "background"
+          "main"
         ],
         "heroId": "book",
         "reasons": [
           {
             "id": "book",
             "reason": "знания, обучение и чтение"
-          },
-          {
-            "id": "lamp",
-            "reason": "вечерняя работа или новая идея"
           }
         ],
         "theme": "learning",
@@ -109,13 +103,11 @@
     "query": "Копить на мечту",
     "ids": [
       "wallet",
-      "coin",
-      "pen"
+      "coin"
     ],
     "roles": [
       "main",
-      "main",
-      "background"
+      "main"
     ],
     "heroId": "wallet",
     "reasons": [
@@ -126,10 +118,6 @@
       {
         "id": "coin",
         "reason": "деньги и накопления"
-      },
-      {
-        "id": "pen",
-        "reason": "запись информации и планирование"
       }
     ],
     "theme": "savings",
@@ -139,13 +127,11 @@
       {
         "ids": [
           "wallet",
-          "coin",
-          "pen"
+          "coin"
         ],
         "roles": [
           "main",
-          "main",
-          "background"
+          "main"
         ],
         "heroId": "wallet",
         "reasons": [
@@ -156,10 +142,6 @@
           {
             "id": "coin",
             "reason": "деньги и накопления"
-          },
-          {
-            "id": "pen",
-            "reason": "запись информации и планирование"
           }
         ],
         "theme": "savings",
@@ -168,22 +150,16 @@
       },
       {
         "ids": [
-          "lamp",
-          "pen"
+          "lamp"
         ],
         "roles": [
-          "main",
-          "background"
+          "main"
         ],
         "heroId": "lamp",
         "reasons": [
           {
             "id": "lamp",
             "reason": "вечерняя работа или новая идея"
-          },
-          {
-            "id": "pen",
-            "reason": "запись информации и планирование"
           }
         ],
         "theme": "ideas",
@@ -226,13 +202,11 @@
     "query": "Найти общий язык",
     "ids": [
       "phone",
-      "puzzle",
-      "pen"
+      "puzzle"
     ],
     "roles": [
       "main",
-      "main",
-      "background"
+      "main"
     ],
     "heroId": "phone",
     "reasons": [
@@ -243,10 +217,6 @@
       {
         "id": "puzzle",
         "reason": "сотрудничество и соединение частей"
-      },
-      {
-        "id": "pen",
-        "reason": "запись информации и планирование"
       }
     ],
     "theme": "communication",
@@ -256,13 +226,11 @@
       {
         "ids": [
           "phone",
-          "puzzle",
-          "pen"
+          "puzzle"
         ],
         "roles": [
           "main",
-          "main",
-          "background"
+          "main"
         ],
         "heroId": "phone",
         "reasons": [
@@ -273,10 +241,6 @@
           {
             "id": "puzzle",
             "reason": "сотрудничество и соединение частей"
-          },
-          {
-            "id": "pen",
-            "reason": "запись информации и планирование"
           }
         ],
         "theme": "communication",
